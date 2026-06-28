@@ -19,14 +19,15 @@ Figma에서 gamelog 와이어프레임과 Design System 페이지를 자동 생�
 ## 생성 화면
 
 1. Home Feed
-2. Match Detail
-3. Write Review
-4. Profile
-5. Statistics
-6. Stadium Collection
-7. Badges
-8. Lists
-9. Wrapped
+2. Timeline
+3. Match Detail
+4. Write Review
+5. Profile
+6. Statistics
+7. Stadium Collection
+8. Badges
+9. Lists
+10. Wrapped
 
 ## 실행 방법
 

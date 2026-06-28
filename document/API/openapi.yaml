@@ -251,6 +251,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MatchLogPage'
+  /me/timeline:
+    get:
+      tags: [Logs]
+      summary: List my timeline
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLogAggregatePage'
   /logs/{logId}:
     patch:
       tags: [Logs]
@@ -421,6 +435,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewPage'
+  /users/{userId}/timeline:
+    get:
+      tags: [Users]
+      security: []
+      summary: List public user timeline
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLogAggregatePage'
   /users/{userId}/stats:
     get:
       tags: [Users]
@@ -654,6 +684,9 @@ components:
     Emotion:
       type: string
       enum: [HAPPY, MOVED, TENSE, ANGRY, SHOCKED]
+    TagType:
+      type: string
+      enum: [OFFICIAL, USER]
     ReviewSort:
       type: string
       enum: [LATEST, MOST_LIKED, RATING_HIGH, RATING_LOW]
@@ -753,12 +786,22 @@ components:
           type: integer
     TagCount:
       type: object
-      required: [name, count]
+      required: [tag, count]
       properties:
-        name:
-          type: string
+        tag:
+          $ref: '#/components/schemas/Tag'
         count:
           type: integer
+    Tag:
+      type: object
+      required: [id, name, tagType]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        tagType:
+          $ref: '#/components/schemas/TagType'
     CreateMatchLogRequest:
       type: object
       required: [watchedAt, watchType, fanPerspective]
@@ -819,11 +862,12 @@ components:
           type: boolean
           default: false
         emotion:
-          $ref: '#/components/schemas/Emotion'
           nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Emotion'
         fanPerspective:
           $ref: '#/components/schemas/FanPerspective'
-        tagNames:
+        userTagNames:
           type: array
           items:
             type: string
@@ -844,9 +888,10 @@ components:
         spoiler:
           type: boolean
         emotion:
-          $ref: '#/components/schemas/Emotion'
           nullable: true
-        tagNames:
+          allOf:
+            - $ref: '#/components/schemas/Emotion'
+        userTagNames:
           type: array
           items:
             type: string
@@ -871,14 +916,15 @@ components:
         spoiler:
           type: boolean
         emotion:
-          $ref: '#/components/schemas/Emotion'
           nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Emotion'
         fanPerspective:
           $ref: '#/components/schemas/FanPerspective'
         tags:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Tag'
         likeCount:
           type: integer
         likedByMe:
@@ -957,6 +1003,12 @@ components:
         supportingTeamWinRate:
           type: number
           nullable: true
+        topEmotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmotionCount'
+        timelineCount:
+          type: integer
     RankedTeam:
       type: object
       required: [team, count]
@@ -1017,6 +1069,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MatchLog'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    MatchLogAggregate:
+      type: object
+      required: [matchLog, matchSummary, timelineDate]
+      properties:
+        matchLog:
+          $ref: '#/components/schemas/MatchLog'
+        review:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Review'
+        userTags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        emotion:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Emotion'
+        mvpVote:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/MvpVote'
+        matchSummary:
+          $ref: '#/components/schemas/MatchSummary'
+        timelineDate:
+          type: string
+          format: date-time
+    MatchLogAggregatePage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchLogAggregate'
         page:
           type: integer
         size:

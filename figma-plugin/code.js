@@ -29,6 +29,7 @@ const F = {
 
 const nav = [
   "Home Feed",
+  "Timeline",
   "Match Detail",
   "Write Review",
   "Profile",
@@ -49,6 +50,17 @@ const screens = [
       { title: "Featured Matches", kind: "match", items: ["FC Seoul vs Jeonbuk", "KBO Playoff Game 5", "Lakers vs Warriors"] },
       { title: "Latest Reviews", kind: "review", items: ["올해 최고의 직관이었다", "원정 팬 입장에서는 너무 아쉬운 경기", "마지막 10분이 모든 것을 바꿨다"] },
       { title: "Trending Tags", kind: "chips", items: ["플레이오프", "올해최고", "다시보고싶다", "최고의직관"] }
+    ]
+  },
+  {
+    name: "Timeline",
+    subtitle: "MatchLogAggregate 기반 개인 기록 피드",
+    tabs: ["All Logs", "In Person", "Live", "High Rating"],
+    metrics: ["148 timeline items", "38 in person", "Top emotion: moved"],
+    panels: [
+      { title: "MatchLogAggregate Feed", kind: "match", items: ["FC Seoul vs Jeonbuk / 4.5", "KBO Playoff Game 5 / moved", "Worlds Finals / 최고의직관"] },
+      { title: "Record Snapshot", kind: "review", items: ["fanPerspective: HOME_FAN", "emotion: MOVED", "mvpVote: player-10"] },
+      { title: "Typed Tags", kind: "chips", items: ["OFFICIAL: 결승전", "USER: 올해최고", "USER: 다시보고싶다"] }
     ]
   },
   {

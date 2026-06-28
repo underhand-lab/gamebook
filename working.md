@@ -2,30 +2,34 @@
 
 ## Goal
 
-- Rename the project/product brand to gamelog across the project.
+- Run a final pre-frontend consistency check across product docs, API contract, and Figma plugin without creating frontend code.
 
 ## Plan
 
-- [x] Search current brand references and distinguish brand terms from domain terms.
-- [x] Replace old brand references with `gamelog`.
-- [x] Preserve `MatchLog` domain model/API terms that mean a match viewing log.
-- [x] Verify no stale brand references remain.
-- [x] Run repository verification once and update `working.md`.
+- [x] Check brand naming and preserved domain terms.
+- [x] Check philosophy, MatchLog-first domain design, fan perspective, emotion, rating, MVP, and uniqueness decisions.
+- [x] Fix documentation/API/Figma mismatches found during the check.
+- [x] Validate OpenAPI parsing, Figma runtime JS syntax, and `git diff --check`.
+- [x] Update `working.md` with final status.
 
 ## Progress
 
-- Found old brand references in product docs, PRDs, API docs, OpenAPI, Figma plugin files, and README.
-- Found `MatchLog`/`matchLogId` domain terms and decided to preserve them.
-- Updated product docs, PRDs, API docs, OpenAPI title/description, Figma plugin metadata/runtime/source, and README to `gamelog`.
-- Confirmed no stale old-brand or previous project-name references remain in project docs/plugin files.
-- Confirmed OpenAPI YAML parses and Figma runtime JS syntax remains valid.
-- Verification passed with `git diff --check`.
+- Confirmed project/product brand is `gamelog`.
+- Confirmed no old brand/project-name references in target docs/plugin files.
+- Confirmed `MatchLog`, `matchLogId`, and `match_logs` remain as domain terms.
+- Found Figma plugin did not yet include Timeline even though Timeline is now MVP/API scope.
+- Found API Spec could list response DTOs more explicitly to match OpenAPI.
+- Added Timeline wireframe coverage to the Figma plugin specs/runtime.
+- Added missing API Spec request/response DTO references that already existed in OpenAPI.
+- Validation passed: OpenAPI YAML parse/contract check, Figma runtime `node --check`, `git diff --check`.
+- Final brand scan passed with no `Matchlog`, `matchlog`, `gamebook`, or `기획서.md` references in target docs/plugin files.
 
 ## Decisions
 
-- Use lowercase `gamelog` as the product/project display name based on the user request.
-- Keep `MatchLog`, `matchLogId`, `match_logs`, and related API/domain terms unchanged because they refer to a match viewing log, not the old brand name.
-- No dependency changes.
+- Do not create frontend code in this task.
+- Keep MatchLog domain naming unchanged.
+- Add Timeline to Figma plugin wireframe generation so design output can map to `MatchLogAggregatePage`.
+- Clarify API Spec response DTOs without changing endpoint scope.
 
 ## Pending
 
@@ -37,5 +41,6 @@
 
 ## Change Log
 
-- 2026-06-28: Started brand rename task.
-- 2026-06-28: Completed project-wide brand rename to `gamelog`.
+- 2026-06-28: Started final pre-frontend consistency check.
+- 2026-06-28: Applied API Spec and Figma plugin consistency fixes.
+- 2026-06-28: Completed final pre-frontend validation.

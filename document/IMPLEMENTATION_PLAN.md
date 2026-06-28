@@ -38,6 +38,7 @@
 ## 3. Completed Artifacts
 
 - PRD 확정 문서: `document/PRD/PRD-FINAL.md`
+- UX 검토 문서: `document/UX_REVIEW.md`
 - 도메인 모델: `document/DOMAIN_MODEL.md`
 - API Spec: `document/API/API_SPEC.md`
 - OpenAPI 문서: `document/API/openapi.yaml`
@@ -71,4 +72,4 @@
 
 다음 작업은 5번 `프론트엔드 생성`이다.
 
-프론트엔드는 `document/API/openapi.yaml`을 기준으로 API client 타입과 mock adapter 응답 형태를 맞춘다.
+프론트엔드는 `document/UX_REVIEW.md`와 `document/API/openapi.yaml`을 기준으로 Timeline 중심 UX와 mock adapter 응답 형태를 맞춘다.

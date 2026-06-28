@@ -5,7 +5,6 @@
 > Last Updated: 2026-06-28
 
 ---
-
 ## 1. Domain Boundaries
 
 gamelog MVP 도메인은 다음 영역으로 나뉜다.
@@ -14,7 +13,6 @@ gamelog MVP 도메인은 다음 영역으로 나뉜다.
 - Lifelog: 관람 기록, 리뷰, 태그, 감정
 - Community: 리뷰 좋아요, 경기 MVP 투표, 팬 관점별 집계
 - Statistics: 사용자 통계, 경기 집계
-
 ## 2. Core Entities
 ### User
 - `id`
@@ -103,6 +101,9 @@ gamelog MVP 도메인은 다음 영역으로 나뉜다.
 ### ReviewTag
 - `reviewId`
 - `tagId`
+### MatchLogTag
+- `matchLogId`
+- `tagId`
 ### ReviewLike
 - `reviewId`
 - `userId`
@@ -114,7 +115,6 @@ gamelog MVP 도메인은 다음 영역으로 나뉜다.
 - `playerId`
 - `createdAt`
 - `updatedAt`
-
 ## 3. Enums
 ### MatchStatus
 - `SCHEDULED`
@@ -143,7 +143,6 @@ gamelog MVP 도메인은 다음 영역으로 나뉜다.
 ### ProfileVisibility
 - `PUBLIC`
 - `PRIVATE`
-
 ## 4. Relationships
 - User 1:1 UserProfile
 - Sport 1:N League
@@ -161,40 +160,32 @@ gamelog MVP 도메인은 다음 영역으로 나뉜다.
 - User 1:N Review
 - Match 1:N Review
 - Review N:M Tag through ReviewTag
+- MatchLog N:M Tag through MatchLogTag
 - User N:M Review through ReviewLike
 - User 1:N MvpVote
 - Match 1:N MvpVote
 - Player 1:N MvpVote
-
 ## 5. Domain Rules
 - 한 사용자는 한 경기당 하나의 MatchLog를 가진다.
 - 한 MatchLog는 최대 하나의 Review를 가진다.
+- 한 사용자는 한 경기당 하나의 Review를 기본으로 한다.
+- MatchLog의 `fanPerspective`는 필수다.
 - Review의 `rating`은 1.0 이상 5.0 이하이며 0.5 단위다.
 - Review의 `fanPerspective`는 필수다.
 - Review의 `emotion`은 선택이지만 선택 시 하나만 저장한다.
 - User Tag는 사용자가 생성할 수 있다.
 - Official Tag는 시스템 또는 관리자만 생성할 수 있다.
+- Official Tag와 User Tag는 API와 UI에서 항상 구분되어야 한다.
 - 한 사용자는 같은 리뷰에 좋아요를 한 번만 누를 수 있다.
 - 한 사용자는 한 경기당 한 명의 MVP만 투표할 수 있다.
 - MVP 후보는 해당 경기의 MatchPlayer에 포함되어야 한다.
-
+- Timeline은 MatchLogAggregate를 최신순으로 보여준다.
 ## 6. Aggregate Models
+### MatchLogAggregate
+- Fields: `matchLog`, `review`, `userTags`, `emotion`, `mvpVote`, `matchSummary`, `timelineDate`
+
+MatchLogAggregate는 개인 기록의 기본 단위다. 리뷰가 없어도 MatchLogAggregate는 존재할 수 있다.
 ### MatchAggregate
-- `reviewCount`
-- `averageRating`
-- `ratingByFanPerspective`
-- `mvpLeaders`
-- `emotionDistribution`
-- `topTags`
+- Fields: `reviewCount`, `averageRating`, `ratingByFanPerspective`, `mvpLeaders`, `emotionDistribution`, `topTags`
 ### UserStats
-- `totalMatches`
-- `inPersonMatches`
-- `liveMatches`
-- `averageRating`
-- `reviewCount`
-- `receivedLikes`
-- `mostWatchedTeams`
-- `mostWatchedPlayers`
-- `mostVisitedStadiums`
-- `inPersonWinRate`
-- `supportingTeamWinRate`
+- Fields: `totalMatches`, `inPersonMatches`, `liveMatches`, `averageRating`, `reviewCount`, `receivedLikes`, `mostWatchedTeams`, `mostWatchedPlayers`, `mostVisitedStadiums`, `inPersonWinRate`, `supportingTeamWinRate`, `topEmotions`, `timelineCount`

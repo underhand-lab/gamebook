@@ -6,7 +6,6 @@
 > OpenAPI: `document/API/openapi.yaml`
 
 ---
-
 ## 1. Scope
 
 이 API Spec은 MVP 프론트엔드 mock adapter와 Spring Boot 백엔드 구현이 공유할 계약을 정의한다.
@@ -16,18 +15,17 @@ MVP API는 다음 기능을 지원한다.
 - 내 프로필
 - 경기 검색과 상세 조회
 - 관람 기록
+- Timeline
 - 리뷰
 - 리뷰 좋아요
 - 경기 MVP 투표
 - 사용자 통계
-
 ## 2. Base Contract
 - Base URL: `/api/v1`
 - Format: JSON
 - Auth: Bearer token
 - Time format: ISO-8601
 - ID format: string
-
 ## 3. Error Response
 
 모든 오류는 동일한 형태를 사용한다.
@@ -40,7 +38,6 @@ MVP API는 다음 기능을 지원한다.
   ]
 }
 ```
-
 ## 4. Endpoints
 ### Auth
 
@@ -72,6 +69,7 @@ MVP API는 다음 기능을 지원한다.
 | --- | --- | --- | --- |
 | POST | `/matches/{matchId}/logs` | 관람 기록 생성 | Yes |
 | GET | `/me/logs` | 내 관람 기록 목록 | Yes |
+| GET | `/me/timeline` | 내 Timeline 조회 | Yes |
 | PATCH | `/logs/{logId}` | 관람 기록 수정 | Yes |
 | DELETE | `/logs/{logId}` | 관람 기록 삭제 | Yes |
 ### Reviews
@@ -94,9 +92,9 @@ MVP API는 다음 기능을 지원한다.
 | Method | Path | Description | Auth |
 | --- | --- | --- | --- |
 | GET | `/users/{userId}` | 공개 프로필 조회 | No |
+| GET | `/users/{userId}/timeline` | 사용자 공개 Timeline 조회 | No |
 | GET | `/users/{userId}/reviews` | 사용자 리뷰 목록 | No |
 | GET | `/users/{userId}/stats` | 사용자 통계 조회 | No |
-
 ## 5. Query Parameters
 ### GET `/matches`
 - `q`: 경기명, 팀명 검색어
@@ -112,89 +110,79 @@ MVP API는 다음 기능을 지원한다.
 - `sort`: `LATEST`, `MOST_LIKED`, `RATING_HIGH`, `RATING_LOW`
 - `page`
 - `size`
-
 ## 6. Request DTOs
 ### SignupRequest
-- `email`
-- `password`
-- `displayName`
+- Fields: `email`, `password`, `displayName`
 ### LoginRequest
-- `email`
-- `password`
+- Fields: `email`, `password`
 ### UpdateProfileRequest
-- `displayName`
-- `bio`
-- `primaryTeamId`
+- Fields: `displayName`, `bio`, `primaryTeamId`
 ### CreateMatchLogRequest
-- `watchedAt`
-- `watchType`
-- `supportingTeamId`
-- `fanPerspective`
+- Fields: `watchedAt`, `watchType`, `supportingTeamId`, `fanPerspective`
+### UpdateMatchLogRequest
+- Same fields as `CreateMatchLogRequest`
 ### CreateReviewRequest
-- `matchLogId`
-- `rating`
-- `title`
-- `body`
-- `spoiler`
-- `emotion`
-- `tagNames`
+- Fields: `matchLogId`, `rating`, `title`, `body`, `spoiler`, `emotion`, `userTagNames`
+### UpdateReviewRequest
+- Fields: `rating`, `title`, `body`, `spoiler`, `emotion`, `userTagNames`
 ### UpsertMvpVoteRequest
-- `playerId`
-
+- Fields: `playerId`
 ## 7. Response DTOs
 ### AuthResponse
-- `accessToken`
-- `user`
+- Fields: `accessToken`, `user`
+### UserDetail
+- Fields: `id`, `email`, `displayName`, `avatarUrl`, `bio`, `primaryTeam`
+### UserSummary
+- Fields: `id`, `displayName`, `avatarUrl`
+### Sport
+- Fields: `id`, `name`, `slug`
+### League
+- Fields: `id`, `sportId`, `name`, `country`, `slug`
+### Team
+- Fields: `id`, `sportId`, `leagueId`, `name`, `shortName`, `slug`
+### Player
+- Fields: `id`, `sportId`, `currentTeamId`, `name`, `slug`
+### Stadium
+- Fields: `id`, `name`, `city`, `country`, `latitude`, `longitude`
+### Score
+- Fields: `home`, `away`
 ### MatchSummary
-- `id`
-- `sport`
-- `league`
-- `homeTeam`
-- `awayTeam`
-- `matchDate`
-- `status`
-- `score`
-- `averageRating`
-- `reviewCount`
+- Fields: `id`, `sport`, `league`, `homeTeam`, `awayTeam`, `matchDate`, `status`, `score`, `averageRating`, `reviewCount`
 ### MatchDetail
-- `id`
-- `sport`
-- `league`
-- `stadium`
-- `homeTeam`
-- `awayTeam`
-- `matchDate`
-- `status`
-- `score`
-- `aggregate`
+- Fields: `id`, `sport`, `league`, `stadium`, `homeTeam`, `awayTeam`, `matchDate`, `status`, `score`, `aggregate`
+### MatchAggregate
+- Fields: `reviewCount`, `averageRating`, `ratingByFanPerspective`, `mvpLeaders`, `emotionDistribution`, `topTags`
+### FanRating
+- Fields: `fanPerspective`, `averageRating`, `reviewCount`
+### MvpLeader
+- Fields: `player`, `voteCount`, `percentage`
+### EmotionCount
+- Fields: `emotion`, `count`
+### TagCount
+- Fields: `tag`, `count`
+### MatchLog
+- Fields: `id`, `userId`, `match`, `watchedAt`, `watchType`, `supportingTeam`, `fanPerspective`, `attendanceVerified`
 ### Review
-- `id`
-- `matchId`
-- `user`
-- `rating`
-- `title`
-- `body`
-- `spoiler`
-- `emotion`
-- `fanPerspective`
-- `tags`
-- `likeCount`
-- `likedByMe`
-- `createdAt`
-- `updatedAt`
+- Fields: `id`, `matchId`, `user`, `rating`, `title`, `body`, `spoiler`, `emotion`, `fanPerspective`, `tags`, `likeCount`, `likedByMe`, `createdAt`, `updatedAt`
+### Tag
+- Fields: `id`, `name`, `tagType`
+### MvpVote
+- Fields: `id`, `matchId`, `userId`, `player`, `createdAt`, `updatedAt`
+### MatchLogAggregate
+- Fields: `matchLog`, `review`, `userTags`, `emotion`, `mvpVote`, `matchSummary`, `timelineDate`
+### Page Responses
+- `MatchPage`, `ReviewPage`, `MatchLogPage`, `MatchLogAggregatePage`: `items`, `page`, `size`, `total`
+### RankedTeam
+- Fields: `team`, `count`
+### RankedPlayer
+- Fields: `player`, `count`
+### RankedStadium
+- Fields: `stadium`, `count`
 ### UserStats
-- `totalMatches`
-- `inPersonMatches`
-- `liveMatches`
-- `averageRating`
-- `reviewCount`
-- `receivedLikes`
-- `mostWatchedTeams`
-- `mostWatchedPlayers`
-- `mostVisitedStadiums`
-- `inPersonWinRate`
-- `supportingTeamWinRate`
+- Fields: `totalMatches`, `inPersonMatches`, `liveMatches`, `averageRating`, `reviewCount`, `receivedLikes`, `mostWatchedTeams`, `mostWatchedPlayers`, `mostVisitedStadiums`, `inPersonWinRate`, `supportingTeamWinRate`, `topEmotions`, `timelineCount`
 ## 8. Implementation Notes
 - 프론트 mock adapter는 이 문서의 DTO 이름과 필드명을 그대로 사용한다.
 - Spring Boot 백엔드는 `openapi.yaml`을 기준으로 controller contract를 맞춘다.
+- Timeline은 `MatchLogAggregatePage` 응답을 사용한다.
+- `Review.tags`, `MatchAggregate.topTags`, `MatchLogAggregate.userTags`는 Typed Tag를 사용한다.
 - Post-MVP 기능은 MVP API에 포함하지 않는다.

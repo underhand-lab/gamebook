@@ -28,6 +28,7 @@ export const F = {
 
 export const nav = [
   "Home Feed",
+  "Timeline",
   "Match Detail",
   "Write Review",
   "Profile",

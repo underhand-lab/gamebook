@@ -364,6 +364,33 @@ eSports
 
 ---
 
+## Timeline
+
+사용자는
+
+자신의 모든 관람 기록을
+
+시간순으로 돌아본다.
+
+Timeline은
+
+리뷰 목록이 아니라
+
+경기 경험의 기록 피드이다.
+
+포함 내용
+
+- 경기
+- 관람 방식
+- 팬 관점
+- 별점
+- 대표 감정
+- 태그
+- 리뷰 요약
+- MVP
+
+---
+
 ## Statistics
 
 자동 생성
@@ -376,6 +403,7 @@ eSports
 - 직관 승률
 - 응원팀 승률
 - 평균 평점
+- 가장 많이 느낀 감정
 
 ---
 
@@ -437,6 +465,7 @@ Verified Attendance 제공
 - 직관 횟수
 - 최고의 경기
 - 평균 평점
+- 올해 가장 많이 느낀 감정
 
 ---
 
@@ -454,6 +483,7 @@ Verified Attendance 제공
 - MVP
 - 관람 방식
 - 팬 관점
+- Timeline
 - 통계
 
 ---
@@ -464,6 +494,7 @@ Verified Attendance 제공
 - AI 경기 요약
 - 하이라이트 연동
 - 친구 비교
+- Diary
 - Fantasy League 연동
 - Apple Wallet 티켓 연동
 - Google Wallet 티켓 연동

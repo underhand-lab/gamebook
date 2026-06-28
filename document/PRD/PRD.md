@@ -4,13 +4,13 @@
 >
 > Last Updated: 2026-06-28
 >
-> Source: `기획서.md`
+> Source: `document/plan.md`
 
 ---
 
 ## Document Set
 
-이 문서는 gamelog PRD 세트의 인덱스다. 원본 `기획서.md`의 제품 철학, 핵심 기능, MVP 범위, 미래 기능, 성공 지표를 6개 PRD 문서로 분리했다.
+이 문서는 gamelog PRD 세트의 인덱스다. 원본 `document/plan.md`의 제품 철학, 핵심 기능, MVP 범위, 미래 기능, 성공 지표를 6개 PRD 문서로 분리했다.
 
 0. [PRD Finalization](./PRD-FINAL.md)
 1. [PRD 01 - Executive Summary & Vision](./PRD-01-executive-summary-vision.md)
@@ -23,6 +23,7 @@
 ## Implementation Docs
 
 - [Implementation Plan](../IMPLEMENTATION_PLAN.md)
+- [UX Review](../UX_REVIEW.md)
 - [Domain Model](../DOMAIN_MODEL.md)
 - [API Spec](../API/API_SPEC.md)
 - [OpenAPI](../API/openapi.yaml)

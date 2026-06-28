@@ -6,7 +6,7 @@
 >
 > Last Updated: 2026-06-28
 >
-> Source: `기획서.md`
+> Source: `document/plan.md`
 
 ---
 
@@ -107,6 +107,16 @@
 - 가장 많이 본 경기장
 - 직관 승률
 - 응원팀 승률
+- 감정 분포
+
+### MatchLog Aggregates
+
+- 관람 기록
+- 연결된 리뷰
+- 사용자 태그
+- 대표 감정
+- 경기 MVP 선택
+- Timeline 표시용 경기 요약
 
 ## 7. API Requirements
 
@@ -146,6 +156,7 @@
 ### Profile / Statistics
 
 - `GET /users/{userId}/logs`
+- `GET /users/{userId}/timeline`
 - `GET /users/{userId}/reviews`
 - `GET /users/{userId}/stats`
 - `GET /users/{userId}/badges`
@@ -163,6 +174,7 @@
 
 - 경기 상세 API는 기본 경기 정보와 집계 요약을 함께 제공해야 한다.
 - 리뷰 목록 API는 팬 관점 필터를 지원해야 한다.
+- Timeline API는 MatchLogAggregate 목록을 최신순으로 제공해야 한다.
 - 프로필 통계 API는 재계산 또는 캐시 전략을 선택할 수 있어야 한다.
 - Post-MVP API는 MVP 출시 전 구현하지 않아도 되지만 확장 가능성을 고려한다.
 

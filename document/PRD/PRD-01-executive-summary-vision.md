@@ -6,7 +6,7 @@
 >
 > Last Updated: 2026-06-28
 >
-> Source: `기획서.md`
+> Source: `document/plan.md`
 
 ---
 

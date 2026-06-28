@@ -33,6 +33,17 @@ export const screens: ScreenSpec[] = [
     ]
   },
   {
+    name: "Timeline",
+    subtitle: "MatchLogAggregate 기반 개인 기록 피드",
+    tabs: ["All Logs", "In Person", "Live", "High Rating"],
+    metrics: ["148 timeline items", "38 in person", "Top emotion: moved"],
+    panels: [
+      { title: "MatchLogAggregate Feed", kind: "match", items: ["FC Seoul vs Jeonbuk / 4.5", "KBO Playoff Game 5 / moved", "Worlds Finals / 최고의직관"] },
+      { title: "Record Snapshot", kind: "review", items: ["fanPerspective: HOME_FAN", "emotion: MOVED", "mvpVote: player-10"] },
+      { title: "Typed Tags", kind: "chips", items: ["OFFICIAL: 결승전", "USER: 올해최고", "USER: 다시보고싶다"] }
+    ]
+  },
+  {
     name: "Match Detail",
     subtitle: "경기 정보, 팬 관점별 리뷰, 평점, MVP, 감정, 태그 집계",
     tabs: ["전체", "홈팬", "원정팬", "타팀 팬", "중립 팬"],
