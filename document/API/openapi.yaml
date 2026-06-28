@@ -1,0 +1,1042 @@
+openapi: 3.0.3
+info:
+  title: gamelog API
+  version: 0.1.0
+  description: MVP API contract for gamelog frontend mock adapter and Spring Boot backend.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Catalog
+  - name: Matches
+  - name: Logs
+  - name: Reviews
+  - name: MVP
+  - name: Users
+paths:
+  /auth/signup:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Sign up
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /me/profile:
+    patch:
+      tags: [Auth]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /sports:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List sports
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sport'
+  /leagues:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List leagues
+      parameters:
+        - $ref: '#/components/parameters/SportId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/League'
+  /teams:
+    get:
+      tags: [Catalog]
+      security: []
+      summary: List teams
+      parameters:
+        - $ref: '#/components/parameters/SportId'
+        - $ref: '#/components/parameters/LeagueId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+  /matches:
+    get:
+      tags: [Matches]
+      security: []
+      summary: Search matches
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/SportId'
+        - $ref: '#/components/parameters/LeagueId'
+        - name: teamId
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchPage'
+  /matches/{matchId}:
+    get:
+      tags: [Matches]
+      security: []
+      summary: Get match detail
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /matches/{matchId}/aggregate:
+    get:
+      tags: [Matches]
+      security: []
+      summary: Get match aggregate
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchAggregate'
+  /matches/{matchId}/players:
+    get:
+      tags: [Matches]
+      security: []
+      summary: List match players
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+  /matches/{matchId}/logs:
+    post:
+      tags: [Logs]
+      summary: Create match log
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMatchLogRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /me/logs:
+    get:
+      tags: [Logs]
+      summary: List my match logs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLogPage'
+  /logs/{logId}:
+    patch:
+      tags: [Logs]
+      summary: Update match log
+      parameters:
+        - $ref: '#/components/parameters/LogId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMatchLogRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLog'
+    delete:
+      tags: [Logs]
+      summary: Delete match log
+      parameters:
+        - $ref: '#/components/parameters/LogId'
+      responses:
+        '204':
+          description: No Content
+  /matches/{matchId}/reviews:
+    get:
+      tags: [Reviews]
+      security: []
+      summary: List match reviews
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+        - name: fanPerspective
+          in: query
+          schema:
+            $ref: '#/components/schemas/FanPerspective'
+        - name: sort
+          in: query
+          schema:
+            $ref: '#/components/schemas/ReviewSort'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewPage'
+    post:
+      tags: [Reviews]
+      summary: Create review
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+  /reviews/{reviewId}:
+    patch:
+      tags: [Reviews]
+      summary: Update review
+      parameters:
+        - $ref: '#/components/parameters/ReviewId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+    delete:
+      tags: [Reviews]
+      summary: Delete review
+      parameters:
+        - $ref: '#/components/parameters/ReviewId'
+      responses:
+        '204':
+          description: No Content
+  /reviews/{reviewId}/like:
+    post:
+      tags: [Reviews]
+      summary: Like review
+      parameters:
+        - $ref: '#/components/parameters/ReviewId'
+      responses:
+        '204':
+          description: No Content
+    delete:
+      tags: [Reviews]
+      summary: Unlike review
+      parameters:
+        - $ref: '#/components/parameters/ReviewId'
+      responses:
+        '204':
+          description: No Content
+  /matches/{matchId}/mvp-vote:
+    put:
+      tags: [MVP]
+      summary: Create or update MVP vote
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertMvpVoteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MvpVote'
+    delete:
+      tags: [MVP]
+      summary: Delete my MVP vote
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '204':
+          description: No Content
+  /users/{userId}:
+    get:
+      tags: [Users]
+      security: []
+      summary: Get public user profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+  /users/{userId}/reviews:
+    get:
+      tags: [Users]
+      security: []
+      summary: List user reviews
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewPage'
+  /users/{userId}/stats:
+    get:
+      tags: [Users]
+      security: []
+      summary: Get user stats
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStats'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    SportId:
+      name: sportId
+      in: query
+      schema:
+        type: string
+    LeagueId:
+      name: leagueId
+      in: query
+      schema:
+        type: string
+    MatchId:
+      name: matchId
+      in: path
+      required: true
+      schema:
+        type: string
+    LogId:
+      name: logId
+      in: path
+      required: true
+      schema:
+        type: string
+    ReviewId:
+      name: reviewId
+      in: path
+      required: true
+      schema:
+        type: string
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    SignupRequest:
+      type: object
+      required: [email, password, displayName]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 40
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      required: [accessToken, user]
+      properties:
+        accessToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserDetail'
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        bio:
+          type: string
+        primaryTeamId:
+          type: string
+    UserDetail:
+      type: object
+      required: [id, email, displayName]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        primaryTeam:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Team'
+    Sport:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+    League:
+      type: object
+      required: [id, sportId, name, slug]
+      properties:
+        id:
+          type: string
+        sportId:
+          type: string
+        name:
+          type: string
+        country:
+          type: string
+        slug:
+          type: string
+    Team:
+      type: object
+      required: [id, sportId, name, shortName, slug]
+      properties:
+        id:
+          type: string
+        sportId:
+          type: string
+        leagueId:
+          type: string
+        name:
+          type: string
+        shortName:
+          type: string
+        slug:
+          type: string
+    Player:
+      type: object
+      required: [id, sportId, name]
+      properties:
+        id:
+          type: string
+        sportId:
+          type: string
+        currentTeamId:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+    Stadium:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+    MatchStatus:
+      type: string
+      enum: [SCHEDULED, LIVE, FINAL, POSTPONED, CANCELED]
+    WatchType:
+      type: string
+      enum: [IN_PERSON, LIVE, OTHER]
+    FanPerspective:
+      type: string
+      enum: [HOME_FAN, AWAY_FAN, OTHER_TEAM_FAN, NEUTRAL_FAN]
+    Emotion:
+      type: string
+      enum: [HAPPY, MOVED, TENSE, ANGRY, SHOCKED]
+    ReviewSort:
+      type: string
+      enum: [LATEST, MOST_LIKED, RATING_HIGH, RATING_LOW]
+    Score:
+      type: object
+      properties:
+        home:
+          type: integer
+          nullable: true
+        away:
+          type: integer
+          nullable: true
+    MatchSummary:
+      type: object
+      required: [id, sport, league, homeTeam, awayTeam, matchDate, status]
+      properties:
+        id:
+          type: string
+        sport:
+          $ref: '#/components/schemas/Sport'
+        league:
+          $ref: '#/components/schemas/League'
+        homeTeam:
+          $ref: '#/components/schemas/Team'
+        awayTeam:
+          $ref: '#/components/schemas/Team'
+        matchDate:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/MatchStatus'
+        score:
+          $ref: '#/components/schemas/Score'
+        averageRating:
+          type: number
+        reviewCount:
+          type: integer
+    MatchDetail:
+      allOf:
+        - $ref: '#/components/schemas/MatchSummary'
+        - type: object
+          properties:
+            stadium:
+              $ref: '#/components/schemas/Stadium'
+            aggregate:
+              $ref: '#/components/schemas/MatchAggregate'
+    MatchAggregate:
+      type: object
+      properties:
+        reviewCount:
+          type: integer
+        averageRating:
+          type: number
+        ratingByFanPerspective:
+          type: array
+          items:
+            $ref: '#/components/schemas/FanRating'
+        mvpLeaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/MvpLeader'
+        emotionDistribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmotionCount'
+        topTags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagCount'
+    FanRating:
+      type: object
+      required: [fanPerspective, averageRating, reviewCount]
+      properties:
+        fanPerspective:
+          $ref: '#/components/schemas/FanPerspective'
+        averageRating:
+          type: number
+        reviewCount:
+          type: integer
+    MvpLeader:
+      type: object
+      required: [player, voteCount]
+      properties:
+        player:
+          $ref: '#/components/schemas/Player'
+        voteCount:
+          type: integer
+        percentage:
+          type: number
+    EmotionCount:
+      type: object
+      required: [emotion, count]
+      properties:
+        emotion:
+          $ref: '#/components/schemas/Emotion'
+        count:
+          type: integer
+    TagCount:
+      type: object
+      required: [name, count]
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+    CreateMatchLogRequest:
+      type: object
+      required: [watchedAt, watchType, fanPerspective]
+      properties:
+        watchedAt:
+          type: string
+          format: date-time
+        watchType:
+          $ref: '#/components/schemas/WatchType'
+        supportingTeamId:
+          type: string
+          nullable: true
+        fanPerspective:
+          $ref: '#/components/schemas/FanPerspective'
+    UpdateMatchLogRequest:
+      $ref: '#/components/schemas/CreateMatchLogRequest'
+    MatchLog:
+      type: object
+      required: [id, userId, match, watchedAt, watchType, fanPerspective, attendanceVerified]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        match:
+          $ref: '#/components/schemas/MatchSummary'
+        watchedAt:
+          type: string
+          format: date-time
+        watchType:
+          $ref: '#/components/schemas/WatchType'
+        supportingTeam:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Team'
+        fanPerspective:
+          $ref: '#/components/schemas/FanPerspective'
+        attendanceVerified:
+          type: boolean
+    CreateReviewRequest:
+      type: object
+      required: [matchLogId, rating, fanPerspective]
+      properties:
+        matchLogId:
+          type: string
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          multipleOf: 0.5
+        title:
+          type: string
+          nullable: true
+        body:
+          type: string
+          nullable: true
+        spoiler:
+          type: boolean
+          default: false
+        emotion:
+          $ref: '#/components/schemas/Emotion'
+          nullable: true
+        fanPerspective:
+          $ref: '#/components/schemas/FanPerspective'
+        tagNames:
+          type: array
+          items:
+            type: string
+    UpdateReviewRequest:
+      type: object
+      properties:
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          multipleOf: 0.5
+        title:
+          type: string
+          nullable: true
+        body:
+          type: string
+          nullable: true
+        spoiler:
+          type: boolean
+        emotion:
+          $ref: '#/components/schemas/Emotion'
+          nullable: true
+        tagNames:
+          type: array
+          items:
+            type: string
+    Review:
+      type: object
+      required: [id, matchId, user, rating, spoiler, fanPerspective, tags, likeCount, likedByMe, createdAt]
+      properties:
+        id:
+          type: string
+        matchId:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserSummary'
+        rating:
+          type: number
+        title:
+          type: string
+          nullable: true
+        body:
+          type: string
+          nullable: true
+        spoiler:
+          type: boolean
+        emotion:
+          $ref: '#/components/schemas/Emotion'
+          nullable: true
+        fanPerspective:
+          $ref: '#/components/schemas/FanPerspective'
+        tags:
+          type: array
+          items:
+            type: string
+        likeCount:
+          type: integer
+        likedByMe:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserSummary:
+      type: object
+      required: [id, displayName]
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+    UpsertMvpVoteRequest:
+      type: object
+      required: [playerId]
+      properties:
+        playerId:
+          type: string
+    MvpVote:
+      type: object
+      required: [id, matchId, userId, player, createdAt]
+      properties:
+        id:
+          type: string
+        matchId:
+          type: string
+        userId:
+          type: string
+        player:
+          $ref: '#/components/schemas/Player'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserStats:
+      type: object
+      properties:
+        totalMatches:
+          type: integer
+        inPersonMatches:
+          type: integer
+        liveMatches:
+          type: integer
+        averageRating:
+          type: number
+        reviewCount:
+          type: integer
+        receivedLikes:
+          type: integer
+        mostWatchedTeams:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedTeam'
+        mostWatchedPlayers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedPlayer'
+        mostVisitedStadiums:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedStadium'
+        inPersonWinRate:
+          type: number
+          nullable: true
+        supportingTeamWinRate:
+          type: number
+          nullable: true
+    RankedTeam:
+      type: object
+      required: [team, count]
+      properties:
+        team:
+          $ref: '#/components/schemas/Team'
+        count:
+          type: integer
+    RankedPlayer:
+      type: object
+      required: [player, count]
+      properties:
+        player:
+          $ref: '#/components/schemas/Player'
+        count:
+          type: integer
+    RankedStadium:
+      type: object
+      required: [stadium, count]
+      properties:
+        stadium:
+          $ref: '#/components/schemas/Stadium'
+        count:
+          type: integer
+    MatchPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    ReviewPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    MatchLogPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchLog'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string
