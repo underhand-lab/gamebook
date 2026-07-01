@@ -21,6 +21,7 @@
 - Vercel과 Render의 자동 배포가 이미 동작하면 GitHub Actions 배포 workflow는 중복이므로 제거한다.
 - Render는 `Docker` 런타임으로 배포하고, 백엔드 루트에 `Dockerfile`을 둔다.
 - 백엔드 CORS는 쉼표로 구분한 여러 origin을 허용한다.
+- 백엔드 저장소는 PostgreSQL로 전환할 수 있도록 정리했다.
 - `frontend`는 `npm run build`가 통과했다.
 - 백엔드는 `backend/Dockerfile`로 Render Docker 런타임에 맞췄다.
 
@@ -33,6 +34,7 @@
 ## Pending
 
 - Vercel 프로젝트 설정 값과 Render Docker 서비스 환경변수, GitHub Secrets 값은 사용자가 채워야 한다.
+- Supabase를 쓰면 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`를 Supabase의 PostgreSQL 연결 값으로 바꿔야 한다.
 - 배포 후 실제 도메인과 환경변수 연결 확인이 남아 있다.
 - 백엔드 검증은 이 환경에서 Gradle 배포본 다운로드가 막혀 완료하지 못했다.
 
