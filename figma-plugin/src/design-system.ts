@@ -6,7 +6,7 @@ export function createDesignSystem(page: PageNode) {
   page.appendChild(root);
 
   root.appendChild(text("gamelog Design System", 40, "Bold"));
-  root.appendChild(text("Editable Figma tokens and reusable components generated from the Product Spec.", 16, "Regular", C.muted));
+  root.appendChild(text("Editable Figma tokens and reusable components matched to the current frontend theme.", 16, "Regular", C.muted));
   root.appendChild(tokenSection());
   root.appendChild(componentSection());
 }
@@ -51,15 +51,15 @@ function componentSection() {
   section.appendChild(text("Components", 24, "Bold"));
 
   const rowA = row("Buttons / Cards / Tabs", 24);
-  rowA.appendChild(buttonComponent("Button / Primary", "Write Review", C.primary, "#FFFFFF"));
-  rowA.appendChild(buttonComponent("Button / Secondary", "View Match", C.primarySoft, C.primary));
+  rowA.appendChild(buttonComponent("Button / Primary", "프로필 수정", C.primary, "#FFFFFF"));
+  rowA.appendChild(buttonComponent("Button / Secondary", "경기 보기", C.surface, C.ink));
   rowA.appendChild(cardComponent());
   rowA.appendChild(tabsComponent());
 
   const rowB = row("Review / Match / Sidebar", 24);
   rowB.appendChild(reviewComponent());
   rowB.appendChild(matchComponent());
-  rowB.appendChild(sidebarComponent("Home Feed"));
+  rowB.appendChild(sidebarComponent("Profile"));
 
   section.appendChild(rowA);
   section.appendChild(rowB);
@@ -70,7 +70,7 @@ function buttonComponent(name: string, label: string, fill: string, color: strin
   const component = figma.createComponent();
   component.name = name;
   auto(component, "HORIZONTAL", 8, 14);
-  component.cornerRadius = 8;
+  component.cornerRadius = 999;
   component.fills = [paint(fill)];
   component.appendChild(text(label, 14, "Semi", color));
   return component;
@@ -83,7 +83,7 @@ function cardComponent() {
   component.resize(220, 120);
   decorate(component);
   component.appendChild(text("Card Title", 16, "Bold"));
-  component.appendChild(text("Reusable card container", 12, "Regular", C.muted));
+  component.appendChild(text("Rounded, bright surface with subtle border and shadow.", 12, "Regular", C.muted));
   return component;
 }
 
@@ -91,7 +91,7 @@ function tabsComponent() {
   const component = figma.createComponent();
   component.name = "Tabs";
   auto(component, "HORIZONTAL", 8, 0);
-  ["All", "Home Fan", "Away Fan"].forEach((label, index) => component.appendChild(chip(label, index === 0)));
+  ["프로필", "내 포스트", "오늘 경기"].forEach((label, index) => component.appendChild(chip(label, index === 0)));
   return component;
 }
 
@@ -102,8 +102,8 @@ function reviewComponent() {
   component.resize(320, 150);
   decorate(component);
   component.appendChild(text("Review Card", 16, "Bold"));
-  component.appendChild(text("Rating, fan perspective, spoiler, emotion, likes", 12, "Regular", C.muted));
-  component.appendChild(text("스포츠는 결과보다 기억이다.", 14, "Medium"));
+  component.appendChild(text("평점, 팬 관점, 스포일러, 감정, 좋아요", 12, "Regular", C.muted));
+  component.appendChild(text("전체 최신 탭의 인기 포스트 예시", 14, "Medium"));
   return component;
 }
 
@@ -114,7 +114,7 @@ function matchComponent() {
   component.resize(320, 96);
   decorate(component);
   component.appendChild(rect("Match visual", 56, 56, C.primarySoft));
-  component.appendChild(text("Match Card / Teams, date, rating, official tags", 14, "Medium", C.muted));
+  component.appendChild(text("Match Card / 팀, 날짜, 평점, 감정, 태그", 14, "Medium", C.muted));
   return component;
 }
 
@@ -125,6 +125,7 @@ function sidebarComponent(active: string) {
   component.resize(256, 420);
   component.fills = [paint(C.dark)];
   component.appendChild(text("gamelog", 22, "Bold", "#FFFFFF"));
-  nav.slice(0, 6).forEach(item => component.appendChild(buttonFrame(`Nav / ${item}`, item, item === active ? C.primary : "transparent", item === active ? "#FFFFFF" : "#D1D5DB")));
+  component.appendChild(text("micro posts for games", 12, "Regular", "#B7C0CE"));
+  nav.slice(0, 5).forEach(item => component.appendChild(buttonFrame(`Nav / ${item}`, item, item === active ? C.primary : "transparent", item === active ? "#FFFFFF" : "#D1D5DB")));
   return component;
 }

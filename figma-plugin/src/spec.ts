@@ -15,26 +15,30 @@ export type PanelKind =
 export type ScreenSpec = {
   name: string;
   subtitle: string;
+  ctaLabel: string;
   tabs: string[];
   metrics: string[];
+  hideMetrics?: boolean;
   panels: { title: string; kind: PanelKind; items: string[] }[];
 };
 
 export const screens: ScreenSpec[] = [
   {
-    name: "Home Feed",
-    subtitle: "Remember Every Game.",
-    tabs: ["For You", "Following", "KBO", "Football", "eSports"],
-    metrics: ["12 games this week", "4.6 avg rating", "128 new reviews"],
+    name: "Home",
+    subtitle: "현재 앱의 홈 피드와 최근 포스트 흐름을 반영한 메인 화면",
+    ctaLabel: "기록 추가",
+    tabs: ["내 포스트", "친구 포스트", "전체 최신"],
+    metrics: ["내 기록 12", "친구 포스트 4", "인기 리뷰 4"],
     panels: [
-      { title: "Featured Matches", kind: "match", items: ["FC Seoul vs Jeonbuk", "KBO Playoff Game 5", "Lakers vs Warriors"] },
-      { title: "Latest Reviews", kind: "review", items: ["올해 최고의 직관이었다", "원정 팬 입장에서는 너무 아쉬운 경기", "마지막 10분이 모든 것을 바꿨다"] },
-      { title: "Trending Tags", kind: "chips", items: ["플레이오프", "올해최고", "다시보고싶다", "최고의직관"] }
+      { title: "내 포스트", kind: "match", items: ["FC Seoul vs Jeonbuk / 4.5", "KBO Playoff Game 5 / MOVED", "Worlds Finals / 최고의직관"] },
+      { title: "친구 포스트", kind: "match", items: ["ANA / Doosan vs LG", "JUN / T1 vs Gen.G", "SOO / Spurs vs Suns"] },
+      { title: "전체 최신", kind: "review", items: ["올해 최고의 직관이었다", "막판 10분이 모든 것을 바꿨다", "좋아요가 몰린 인기 리뷰"] }
     ]
   },
   {
     name: "Timeline",
     subtitle: "MatchLogAggregate 기반 개인 기록 피드",
+    ctaLabel: "기록 추가",
     tabs: ["All Logs", "In Person", "Live", "High Rating"],
     metrics: ["148 timeline items", "38 in person", "Top emotion: moved"],
     panels: [
@@ -46,6 +50,7 @@ export const screens: ScreenSpec[] = [
   {
     name: "Match Detail",
     subtitle: "경기 정보, 팬 관점별 리뷰, 평점, MVP, 감정, 태그 집계",
+    ctaLabel: "기록하기",
     tabs: ["전체", "홈팬", "원정팬", "타팀 팬", "중립 팬"],
     metrics: ["4.7 community rating", "832 reviews", "MVP 42%"],
     panels: [
@@ -57,6 +62,7 @@ export const screens: ScreenSpec[] = [
   {
     name: "Write Review",
     subtitle: "관람 방식, 팬 관점, 별점, 리뷰, 감정, 태그, MVP 입력",
+    ctaLabel: "저장",
     tabs: ["경기 선택", "리뷰 작성", "확인"],
     metrics: ["Required: match", "Required: rating", "Required: fan view"],
     panels: [
@@ -67,29 +73,22 @@ export const screens: ScreenSpec[] = [
   },
   {
     name: "Profile",
-    subtitle: "사용자의 모든 경기 기록과 리뷰를 저장하는 공간",
-    tabs: ["Overview", "Reviews", "Matches", "Lists"],
-    metrics: ["148 total games", "38 in person", "4.2 avg rating"],
+    subtitle: "프로필 정보와 리그/팀 스코프 통계를 함께 보는 개인 허브",
+    ctaLabel: "프로필 수정",
+    tabs: ["프로필", "내 포스트", "친구 포스트", "전체 최신", "오늘 경기"],
+    metrics: [],
+    hideMetrics: true,
     panels: [
-      { title: "Profile Header", kind: "profile", items: ["easyh", "응원팀 FC Seoul", "첫 직관 2019"] },
-      { title: "Recent Logs", kind: "match", items: ["FC Seoul vs Jeonbuk", "KBO Playoff Game 5", "Worlds Finals"] },
-      { title: "Recent Reviews", kind: "review", items: ["첫 직관은 평생 기억된다", "올해 최고의 경기", "다시 보고 싶은 경기"] }
-    ]
-  },
-  {
-    name: "Statistics",
-    subtitle: "가장 많이 본 팀, 선수, 경기장, 직관 승률, 응원팀 승률",
-    tabs: ["Summary", "Teams", "Players", "Stadiums"],
-    metrics: ["Most watched: FC Seoul", "In-person win rate 61%", "Support team win rate 54%"],
-    panels: [
-      { title: "Top Teams", kind: "bars", items: ["FC Seoul 88", "Doosan Bears 56", "Lakers 34", "T1 29"] },
-      { title: "Top Stadiums", kind: "bars", items: ["Seoul WC 72", "Jamsil 31", "Gocheok 14"] },
-      { title: "Rating Distribution", kind: "bars", items: ["5 stars 64", "4 stars 48", "3 stars 21", "2 stars 8"] }
+      { title: "프로필 정보", kind: "profile", items: ["easyh · easyh@email.com", "소개가 없습니다.", "K League · FC Seoul / KBO · Doosan Bears / LCK · T1"] },
+      { title: "통계 범위", kind: "chips", items: ["전체 리그", "K League", "FC Seoul", "Doosan Bears"] },
+      { title: "프로필 통계", kind: "bars", items: ["평균 평점 84", "직관 수 62", "경기 시청 수 76", "받은 공감 58"] },
+      { title: "별점 분포", kind: "bars", items: ["5점 64", "4점 48", "3점 21", "2점 8"] }
     ]
   },
   {
     name: "Stadium Collection",
     subtitle: "방문한 경기장을 수집하고 지도 형태로 확인",
+    ctaLabel: "모아보기",
     tabs: ["Map", "Visited", "Wishlist"],
     metrics: ["14 stadiums visited", "38 verified visits", "3 countries"],
     panels: [
@@ -101,6 +100,7 @@ export const screens: ScreenSpec[] = [
   {
     name: "Badges",
     subtitle: "경험, 활동, 특별 순간을 배지로 보관",
+    ctaLabel: "전체 보기",
     tabs: ["All", "Experience", "Activity", "Special"],
     metrics: ["18 earned", "7 experience", "4 special"],
     panels: [
@@ -112,6 +112,7 @@ export const screens: ScreenSpec[] = [
   {
     name: "Lists",
     subtitle: "사용자가 자신만의 경기 리스트를 만드는 공간",
+    ctaLabel: "리스트 만들기",
     tabs: ["My Lists", "Liked", "Discover"],
     metrics: ["8 lists", "312 likes", "42 saved matches"],
     panels: [
@@ -123,6 +124,7 @@ export const screens: ScreenSpec[] = [
   {
     name: "Wrapped",
     subtitle: "매년 스포츠 활동을 자동 요약",
+    ctaLabel: "공유",
     tabs: ["2026", "Highlights", "Share"],
     metrics: ["72 games watched", "18 in person", "4.5 avg rating"],
     panels: [

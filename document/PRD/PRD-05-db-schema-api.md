@@ -26,6 +26,7 @@
 
 - `users`: id, email, display_name, avatar_url, created_at, updated_at
 - `user_profiles`: user_id, bio, primary_team_id, visibility, created_at, updated_at
+- `favorite_teams`: id, user_id, sport_id, league_id, team_id, created_at
 - `sports`: id, name, slug
 - `leagues`: id, sport_id, name, country, slug
 - `teams`: id, sport_id, league_id, name, short_name, slug
@@ -77,6 +78,7 @@
 
 - `review_likes`는 `review_id + user_id` 조합이 유니크해야 한다.
 - `mvp_votes`는 MVP 정책에 따라 `match_id + user_id` 조합 유니크 여부를 결정한다.
+- `favorite_teams`는 `user_id + team_id` 조합이 유니크해야 한다.
 - 리뷰는 반드시 사용자와 경기에 연결되어야 한다.
 - 공식 태그는 시스템 또는 관리자만 생성할 수 있어야 한다.
 - 사용자는 본인의 기록, 리뷰, 리스트만 수정할 수 있어야 한다.
@@ -87,10 +89,12 @@
 
 - 전체 평균 평점
 - 팬 관점별 평균 평점
+- 별점 분포
 - 리뷰 수
 - 팬 관점별 리뷰 수
 - 경기 MVP 투표 결과
 - 감정 분포
+- 별점 분포
 - 사용자 태그 빈도
 - 좋아요 수
 
@@ -117,6 +121,7 @@
 - 대표 감정
 - 경기 MVP 선택
 - Timeline 표시용 경기 요약
+- Calendar / Diary 표시용 날짜 그룹
 
 ## 7. API Requirements
 
@@ -127,19 +132,29 @@
 - `GET /me`
 - `GET /users/{userId}`
 - `PATCH /me/profile`
+- `GET /me/favorite-teams`
+- `PUT /me/favorite-teams`
 
 ### Matches
 
 - `GET /matches`
+- `GET /games/date/{date}`
 - `GET /matches/{matchId}`
 - `GET /matches/{matchId}/reviews`
-- `GET /matches/{matchId}/ratings`
-- `GET /matches/{matchId}/mvp`
-- `GET /matches/{matchId}/tags`
+- `GET /matches/{matchId}/aggregate`
+- `GET /matches/{matchId}/players`
+
+### Tags
+
+- `GET /tags`
+- `GET /tags/{tagName}`
+- `GET /tags/{tagName}/matches`
 
 ### Match Logs / Reviews
 
 - `POST /matches/{matchId}/logs`
+- `GET /me/logs`
+- `GET /me/timeline`
 - `PATCH /logs/{logId}`
 - `DELETE /logs/{logId}`
 - `POST /matches/{matchId}/reviews`
@@ -150,8 +165,13 @@
 
 - `POST /reviews/{reviewId}/like`
 - `DELETE /reviews/{reviewId}/like`
-- `POST /matches/{matchId}/mvp-votes`
-- `PATCH /matches/{matchId}/mvp-votes/me`
+- `PUT /matches/{matchId}/mvp-vote`
+- `DELETE /matches/{matchId}/mvp-vote`
+
+### Calendar / Diary
+
+- `GET /me/calendar?month=YYYY-MM`
+- `GET /me/calendar/{date}`
 
 ### Profile / Statistics
 
@@ -173,7 +193,11 @@
 ## 8. API Response Principles
 
 - 경기 상세 API는 기본 경기 정보와 집계 요약을 함께 제공해야 한다.
+- 경기 집계에는 `ratingDistribution`이 포함되어야 한다.
 - 리뷰 목록 API는 팬 관점 필터를 지원해야 한다.
+- 태그 API는 `TagSearchResult`, `TagDetail`, `MatchPage` mock response 구조를 사용해야 한다.
+- 일자별 경기 API는 `DateMatchPage` mock response 구조를 사용해야 한다.
+- Calendar / Diary API는 `CalendarMonth`, `CalendarDiaryDay` mock response 구조를 사용해야 한다.
 - Timeline API는 MatchLogAggregate 목록을 최신순으로 제공해야 한다.
 - 프로필 통계 API는 재계산 또는 캐시 전략을 선택할 수 있어야 한다.
 - Post-MVP API는 MVP 출시 전 구현하지 않아도 되지만 확장 가능성을 고려한다.

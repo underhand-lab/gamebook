@@ -4,36 +4,35 @@ const HEIGHT = 1024;
 const SIDEBAR = 256;
 
 const C = {
-  bg: "#F6F7F9",
+  bg: "#F6F1EA",
   surface: "#FFFFFF",
-  ink: "#15171A",
+  ink: "#171A1F",
   muted: "#6B7280",
-  line: "#DDE1E7",
+  line: "#DED6CB",
   primary: "#1F6FEB",
   primarySoft: "#E8F1FF",
-  green: "#17A673",
-  greenSoft: "#E9F8F2",
+  green: "#16A34A",
+  greenSoft: "#EAF7EF",
   amber: "#D97706",
   amberSoft: "#FFF4DF",
   red: "#DC2626",
-  redSoft: "#FEECEC",
+  redSoft: "#FDECEC",
   dark: "#111827"
 };
 
 const F = {
-  Regular: { family: "Inter", style: "Regular" },
-  Medium: { family: "Inter", style: "Medium" },
-  Semi: { family: "Inter", style: "Semi Bold" },
-  Bold: { family: "Inter", style: "Bold" }
+  Regular: { family: "Avenir Next", style: "Regular" },
+  Medium: { family: "Avenir Next", style: "Medium" },
+  Semi: { family: "Avenir Next", style: "Demi Bold" },
+  Bold: { family: "Avenir Next", style: "Bold" }
 };
 
 const nav = [
-  "Home Feed",
+  "Home",
   "Timeline",
   "Match Detail",
   "Write Review",
   "Profile",
-  "Statistics",
   "Stadium Collection",
   "Badges",
   "Lists",
@@ -42,19 +41,21 @@ const nav = [
 
 const screens = [
   {
-    name: "Home Feed",
-    subtitle: "Remember Every Game.",
-    tabs: ["For You", "Following", "KBO", "Football", "eSports"],
-    metrics: ["12 games this week", "4.6 avg rating", "128 new reviews"],
+    name: "Home",
+    subtitle: "현재 앱의 홈 피드와 최근 포스트 흐름을 반영한 메인 화면",
+    ctaLabel: "기록 추가",
+    tabs: ["내 포스트", "친구 포스트", "전체 최신"],
+    metrics: ["내 기록 12", "친구 포스트 4", "인기 리뷰 4"],
     panels: [
-      { title: "Featured Matches", kind: "match", items: ["FC Seoul vs Jeonbuk", "KBO Playoff Game 5", "Lakers vs Warriors"] },
-      { title: "Latest Reviews", kind: "review", items: ["올해 최고의 직관이었다", "원정 팬 입장에서는 너무 아쉬운 경기", "마지막 10분이 모든 것을 바꿨다"] },
-      { title: "Trending Tags", kind: "chips", items: ["플레이오프", "올해최고", "다시보고싶다", "최고의직관"] }
+      { title: "내 포스트", kind: "match", items: ["FC Seoul vs Jeonbuk / 4.5", "KBO Playoff Game 5 / MOVED", "Worlds Finals / 최고의직관"] },
+      { title: "친구 포스트", kind: "match", items: ["ANA / Doosan vs LG", "JUN / T1 vs Gen.G", "SOO / Spurs vs Suns"] },
+      { title: "전체 최신", kind: "review", items: ["올해 최고의 직관이었다", "막판 10분이 모든 것을 바꿨다", "좋아요가 몰린 인기 리뷰"] }
     ]
   },
   {
     name: "Timeline",
     subtitle: "MatchLogAggregate 기반 개인 기록 피드",
+    ctaLabel: "기록 추가",
     tabs: ["All Logs", "In Person", "Live", "High Rating"],
     metrics: ["148 timeline items", "38 in person", "Top emotion: moved"],
     panels: [
@@ -66,6 +67,7 @@ const screens = [
   {
     name: "Match Detail",
     subtitle: "경기 정보, 팬 관점별 리뷰, 평점, MVP, 감정, 태그 집계",
+    ctaLabel: "기록하기",
     tabs: ["전체", "홈팬", "원정팬", "타팀 팬", "중립 팬"],
     metrics: ["4.7 community rating", "832 reviews", "MVP 42%"],
     panels: [
@@ -77,6 +79,7 @@ const screens = [
   {
     name: "Write Review",
     subtitle: "관람 방식, 팬 관점, 별점, 리뷰, 감정, 태그, MVP 입력",
+    ctaLabel: "저장",
     tabs: ["경기 선택", "리뷰 작성", "확인"],
     metrics: ["Required: match", "Required: rating", "Required: fan view"],
     panels: [
@@ -87,29 +90,22 @@ const screens = [
   },
   {
     name: "Profile",
-    subtitle: "사용자의 모든 경기 기록과 리뷰를 저장하는 공간",
-    tabs: ["Overview", "Reviews", "Matches", "Lists"],
-    metrics: ["148 total games", "38 in person", "4.2 avg rating"],
+    subtitle: "프로필 정보와 리그/팀 스코프 통계를 함께 보는 개인 허브",
+    ctaLabel: "프로필 수정",
+    tabs: ["프로필", "내 포스트", "친구 포스트", "전체 최신", "오늘 경기"],
+    metrics: [],
+    hideMetrics: true,
     panels: [
-      { title: "Profile Header", kind: "profile", items: ["easyh", "응원팀 FC Seoul", "첫 직관 2019"] },
-      { title: "Recent Logs", kind: "match", items: ["FC Seoul vs Jeonbuk", "KBO Playoff Game 5", "Worlds Finals"] },
-      { title: "Recent Reviews", kind: "review", items: ["첫 직관은 평생 기억된다", "올해 최고의 경기", "다시 보고 싶은 경기"] }
-    ]
-  },
-  {
-    name: "Statistics",
-    subtitle: "가장 많이 본 팀, 선수, 경기장, 직관 승률, 응원팀 승률",
-    tabs: ["Summary", "Teams", "Players", "Stadiums"],
-    metrics: ["Most watched: FC Seoul", "In-person win rate 61%", "Support team win rate 54%"],
-    panels: [
-      { title: "Top Teams", kind: "bars", items: ["FC Seoul 88", "Doosan Bears 56", "Lakers 34", "T1 29"] },
-      { title: "Top Stadiums", kind: "bars", items: ["Seoul WC 72", "Jamsil 31", "Gocheok 14"] },
-      { title: "Rating Distribution", kind: "bars", items: ["5 stars 64", "4 stars 48", "3 stars 21", "2 stars 8"] }
+      { title: "프로필 정보", kind: "profile", items: ["easyh · easyh@email.com", "소개가 없습니다.", "K League · FC Seoul / KBO · Doosan Bears / LCK · T1"] },
+      { title: "통계 범위", kind: "chips", items: ["전체 리그", "K League", "FC Seoul", "Doosan Bears"] },
+      { title: "프로필 통계", kind: "bars", items: ["평균 평점 84", "직관 수 62", "경기 시청 수 76", "받은 공감 58"] },
+      { title: "별점 분포", kind: "bars", items: ["5점 64", "4점 48", "3점 21", "2점 8"] }
     ]
   },
   {
     name: "Stadium Collection",
     subtitle: "방문한 경기장을 수집하고 지도 형태로 확인",
+    ctaLabel: "모아보기",
     tabs: ["Map", "Visited", "Wishlist"],
     metrics: ["14 stadiums visited", "38 verified visits", "3 countries"],
     panels: [
@@ -121,6 +117,7 @@ const screens = [
   {
     name: "Badges",
     subtitle: "경험, 활동, 특별 순간을 배지로 보관",
+    ctaLabel: "전체 보기",
     tabs: ["All", "Experience", "Activity", "Special"],
     metrics: ["18 earned", "7 experience", "4 special"],
     panels: [
@@ -132,6 +129,7 @@ const screens = [
   {
     name: "Lists",
     subtitle: "사용자가 자신만의 경기 리스트를 만드는 공간",
+    ctaLabel: "리스트 만들기",
     tabs: ["My Lists", "Liked", "Discover"],
     metrics: ["8 lists", "312 likes", "42 saved matches"],
     panels: [
@@ -143,6 +141,7 @@ const screens = [
   {
     name: "Wrapped",
     subtitle: "매년 스포츠 활동을 자동 요약",
+    ctaLabel: "공유",
     tabs: ["2026", "Highlights", "Share"],
     metrics: ["72 games watched", "18 in person", "4.5 avg rating"],
     panels: [
@@ -185,8 +184,8 @@ function createDesignSystem(page) {
   const componentGrid = stack("Components", 1344, 24, 0, null);
   componentGrid.appendChild(text("Components", 24, "Bold"));
   const rowA = row("Buttons / Cards / Tabs", 24);
-  const button = buttonComponent("Button / Primary", "Write Review", C.primary, "#FFFFFF");
-  const secondary = buttonComponent("Button / Secondary", "View Match", C.primarySoft, C.primary);
+  const button = buttonComponent("Button / Primary", "프로필 수정", C.primary, "#FFFFFF");
+  const secondary = buttonComponent("Button / Secondary", "경기 보기", C.primarySoft, C.primary);
   const card = cardComponent();
   const tabs = tabsComponent();
   rowA.appendChild(button);
@@ -196,7 +195,7 @@ function createDesignSystem(page) {
   const rowB = row("Review / Match / Sidebar", 24);
   const review = reviewComponent();
   const match = matchComponent();
-  const sidebar = sidebarComponent("Home Feed");
+  const sidebar = sidebarComponent("Profile");
   rowB.appendChild(review);
   rowB.appendChild(match);
   rowB.appendChild(sidebar);
@@ -254,15 +253,36 @@ function createScreen(spec, index, components) {
   titleBox.appendChild(text(spec.name, 32, "Bold"));
   titleBox.appendChild(text(spec.subtitle, 14, "Regular", C.muted));
   header.appendChild(titleBox);
-  header.appendChild(buttonFrame("Primary CTA", "Record Match", C.primary, "#FFFFFF"));
+  header.appendChild(buttonFrame("Primary CTA", spec.ctaLabel, C.primary, "#FFFFFF"));
   main.appendChild(header);
   main.appendChild(tabBar(spec.tabs));
-  main.appendChild(metricRow(spec.metrics));
-  const grid = row(`${spec.name} / Content Grid`, 24);
-  spec.panels.forEach((panel, i) => grid.appendChild(panelFrame(panel, i === 0 ? 456 : 286, components)));
-  main.appendChild(grid);
+  if (!spec.hideMetrics) {
+    main.appendChild(metricRow(spec.metrics));
+  }
+  main.appendChild(spec.name === "Profile" ? profileGrid(spec, components) : defaultGrid(spec, components));
   root.appendChild(main);
   return root;
+}
+
+function defaultGrid(spec, components) {
+  const grid = row(`${spec.name} / Content Grid`, 24);
+  spec.panels.forEach((panel, i) => {
+    grid.appendChild(panelFrame(panel, i === 0 ? 456 : 286, components));
+  });
+  return grid;
+}
+
+function profileGrid(spec, components) {
+  const grid = row(`${spec.name} / Split Grid`, 24);
+  const left = stack("Profile Left", 456, 16, 0, null);
+  const right = stack("Profile Right", 520, 16, 0, null);
+  left.appendChild(panelFrame(spec.panels[0], 456, components));
+  right.appendChild(panelFrame(spec.panels[1], 520, components));
+  right.appendChild(panelFrame(spec.panels[2], 520, components));
+  right.appendChild(panelFrame(spec.panels[3], 520, components));
+  grid.appendChild(left);
+  grid.appendChild(right);
+  return grid;
 }
 
 function panelFrame(spec, width, components) {
@@ -288,7 +308,7 @@ function sidebar(active) {
   s.resize(SIDEBAR, HEIGHT);
   s.counterAxisSizingMode = "FIXED";
   s.appendChild(text("gamelog", 24, "Bold", "#FFFFFF"));
-  s.appendChild(text("Remember Every Game.", 12, "Regular", "#B7C0CE"));
+  s.appendChild(text("micro posts for games", 12, "Regular", "#B7C0CE"));
   nav.forEach(item => s.appendChild(navItem(item, item === active)));
   return s;
 }
@@ -298,7 +318,7 @@ function navItem(label, active) {
   item.resize(208, 40);
   item.paddingLeft = 12;
   item.paddingRight = 12;
-  item.cornerRadius = 8;
+  item.cornerRadius = 999;
   item.appendChild(rect("Icon", 16, 16, active ? "#FFFFFF" : "#6B7280"));
   item.appendChild(text(label, 13, "Medium", active ? "#FFFFFF" : "#D1D5DB"));
   return item;
@@ -309,7 +329,7 @@ function metricRow(items) {
   items.forEach(item => {
     const m = cardFrame(`Metric / ${item}`, 250);
     m.appendChild(text(item, 16, "Bold"));
-    m.appendChild(text("Auto-generated summary", 12, "Regular", C.muted));
+    m.appendChild(text("현재 앱 구조 기준 요약", 12, "Regular", C.muted));
     r.appendChild(m);
   });
   return r;
@@ -322,7 +342,7 @@ function matchRow(label) {
   c.appendChild(rect("Team thumbnail", 48, 48, C.primarySoft));
   const copy = stack("Match copy", 160, 4, 0, null);
   copy.appendChild(text(label, 14, "Semi"));
-  copy.appendChild(text("Rating, tags, fan perspective", 11, "Regular", C.muted));
+  copy.appendChild(text("평점, 감정, 태그, 팬 관점", 11, "Regular", C.muted));
   c.appendChild(copy);
   return c;
 }
@@ -330,9 +350,9 @@ function matchRow(label) {
 function reviewRow(label) {
   const c = stack(`Review Card / ${label}`, 244, 8, 14, C.surface);
   decorate(c);
-  c.appendChild(text("4.5 / Home fan", 12, "Semi", C.primary));
+  c.appendChild(text("4.5 / 홈팀 팬", 12, "Semi", C.primary));
   c.appendChild(text(label, 14, "Medium"));
-  c.appendChild(text("Likes, spoiler, emotion, tags", 11, "Regular", C.muted));
+  c.appendChild(text("좋아요, 스포일러, 감정, 태그", 11, "Regular", C.muted));
   return c;
 }
 
@@ -346,7 +366,7 @@ function chipCloud(items) {
 
 function scoreboard(items) {
   const box = stack("Scoreboard", 440, 16, 20, C.primarySoft);
-  box.cornerRadius = 12;
+  box.cornerRadius = 20;
   box.appendChild(text(items[0], 28, "Bold", C.primary));
   box.appendChild(text(items[1], 28, "Bold", C.ink));
   box.appendChild(text(items[2], 13, "Regular", C.muted));
@@ -377,8 +397,9 @@ function inputRow(label) {
 }
 
 function profileBlock(items) {
-  const b = stack("Profile Block", 244, 12, 0, null);
+  const b = stack("Profile Block", 420, 12, 0, null);
   b.appendChild(rect("Avatar", 72, 72, C.primarySoft));
+  b.appendChild(text("넓은 화면에서는 좌측 프로필 정보 영역", 12, "Regular", C.muted));
   items.forEach(item => b.appendChild(text(item, 14, "Medium")));
   return b;
 }
@@ -429,7 +450,7 @@ function listRow(label) {
 
 function wrappedCard(label) {
   const c = stack(`Wrapped Card / ${label}`, 244, 10, 16, C.primary);
-  c.cornerRadius = 14;
+  c.cornerRadius = 20;
   c.appendChild(text(label, 18, "Bold", "#FFFFFF"));
   c.appendChild(text("Annual memory module", 12, "Regular", "#DCEBFF"));
   return c;
@@ -457,7 +478,7 @@ function buttonComponent(name, label, fill, color) {
   const c = figma.createComponent();
   c.name = name;
   auto(c, "HORIZONTAL", 8, 14);
-  c.cornerRadius = 8;
+  c.cornerRadius = 999;
   c.fills = [paint(fill)];
   c.appendChild(text(label, 14, "Semi", color));
   return c;
@@ -478,7 +499,7 @@ function tabsComponent() {
   const c = figma.createComponent();
   c.name = "Tabs";
   auto(c, "HORIZONTAL", 8, 0);
-  ["All", "Home Fan", "Away Fan"].forEach((label, i) => c.appendChild(chip(label, i === 0)));
+  ["프로필", "내 포스트", "오늘 경기"].forEach((label, i) => c.appendChild(chip(label, i === 0)));
   return c;
 }
 
@@ -489,8 +510,8 @@ function reviewComponent() {
   c.resize(320, 150);
   decorate(c);
   c.appendChild(text("Review Card", 16, "Bold"));
-  c.appendChild(text("Rating, fan perspective, spoiler, emotion, likes", 12, "Regular", C.muted));
-  c.appendChild(text("스포츠는 결과보다 기억이다.", 14, "Medium"));
+  c.appendChild(text("평점, 팬 관점, 스포일러, 감정, 좋아요", 12, "Regular", C.muted));
+  c.appendChild(text("전체 최신 탭의 인기 포스트 예시", 14, "Medium"));
   return c;
 }
 
@@ -503,7 +524,7 @@ function matchComponent() {
   c.appendChild(rect("Match visual", 56, 56, C.primarySoft));
   const copy = stack("Copy", 220, 6, 0, null);
   copy.appendChild(text("Match Card", 16, "Bold"));
-  copy.appendChild(text("Teams, date, rating, official tags", 12, "Regular", C.muted));
+  copy.appendChild(text("팀, 날짜, 평점, 감정, 태그", 12, "Regular", C.muted));
   c.appendChild(copy);
   return c;
 }
@@ -515,7 +536,7 @@ function sidebarComponent(active) {
   c.resize(256, 420);
   c.fills = [paint(C.dark)];
   c.appendChild(text("gamelog", 22, "Bold", "#FFFFFF"));
-  nav.slice(0, 6).forEach(item => c.appendChild(navItem(item, item === active)));
+  nav.slice(0, 5).forEach(item => c.appendChild(navItem(item, item === active)));
   return c;
 }
 
@@ -525,7 +546,7 @@ function buttonFrame(name, label, fill, color) {
   b.paddingRight = 18;
   b.paddingTop = 12;
   b.paddingBottom = 12;
-  b.cornerRadius = 8;
+  b.cornerRadius = 999;
   b.appendChild(text(label, 14, "Semi", color));
   return b;
 }
@@ -590,7 +611,7 @@ function auto(node, mode, gap, pad) {
 }
 
 function decorate(node) {
-  node.cornerRadius = 12;
+  node.cornerRadius = 20;
   node.strokes = [paint(C.line)];
   node.strokeWeight = 1;
 }

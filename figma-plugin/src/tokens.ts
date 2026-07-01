@@ -3,36 +3,35 @@ export const HEIGHT = 1024;
 export const SIDEBAR = 256;
 
 export const C = {
-  bg: "#F6F7F9",
+  bg: "#F6F1EA",
   surface: "#FFFFFF",
-  ink: "#15171A",
+  ink: "#171A1F",
   muted: "#6B7280",
-  line: "#DDE1E7",
+  line: "#DED6CB",
   primary: "#1F6FEB",
   primarySoft: "#E8F1FF",
-  green: "#17A673",
-  greenSoft: "#E9F8F2",
+  green: "#16A34A",
+  greenSoft: "#EAF7EF",
   amber: "#D97706",
   amberSoft: "#FFF4DF",
   red: "#DC2626",
-  redSoft: "#FEECEC",
+  redSoft: "#FDECEC",
   dark: "#111827"
 };
 
 export const F = {
-  Regular: { family: "Inter", style: "Regular" },
-  Medium: { family: "Inter", style: "Medium" },
-  Semi: { family: "Inter", style: "Semi Bold" },
-  Bold: { family: "Inter", style: "Bold" }
+  Regular: { family: "Avenir Next", style: "Regular" },
+  Medium: { family: "Avenir Next", style: "Medium" },
+  Semi: { family: "Avenir Next", style: "Demi Bold" },
+  Bold: { family: "Avenir Next", style: "Bold" }
 } as const;
 
 export const nav = [
-  "Home Feed",
+  "Home",
   "Timeline",
   "Match Detail",
   "Write Review",
   "Profile",
-  "Statistics",
   "Stadium Collection",
   "Badges",
   "Lists",

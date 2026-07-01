@@ -14,6 +14,8 @@ tags:
   - name: Logs
   - name: Reviews
   - name: MVP
+  - name: Tags
+  - name: Calendar
   - name: Users
 paths:
   /auth/signup:
@@ -86,6 +88,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /me/favorite-teams:
+    get:
+      tags: [Auth]
+      summary: List current user's favorite teams
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FavoriteTeam'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [Auth]
+      summary: Replace current user's favorite teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFavoriteTeamsRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FavoriteTeam'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /sports:
@@ -170,6 +207,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MatchPage'
+  /games/date/{date}:
+    get:
+      tags: [Matches]
+      security: []
+      summary: List matches by date
+      parameters:
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/SportId'
+        - $ref: '#/components/parameters/LeagueId'
+        - name: favoriteTeamId
+          in: query
+          schema:
+            type: string
+        - name: favoriteOnly
+          in: query
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DateMatchPage'
   /matches/{matchId}:
     get:
       tags: [Matches]
@@ -378,6 +441,63 @@ paths:
       responses:
         '204':
           description: No Content
+  /tags:
+    get:
+      tags: [Tags]
+      security: []
+      summary: Search tags
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: tagType
+          in: query
+          schema:
+            $ref: '#/components/schemas/TagType'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagPage'
+  /tags/{tagName}:
+    get:
+      tags: [Tags]
+      security: []
+      summary: Get tag detail
+      parameters:
+        - $ref: '#/components/parameters/TagName'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /tags/{tagName}/matches:
+    get:
+      tags: [Tags]
+      security: []
+      summary: List matches for tag
+      parameters:
+        - $ref: '#/components/parameters/TagName'
+        - $ref: '#/components/parameters/SportId'
+        - $ref: '#/components/parameters/LeagueId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchPage'
   /matches/{matchId}/mvp-vote:
     put:
       tags: [MVP]
@@ -405,6 +525,41 @@ paths:
       responses:
         '204':
           description: No Content
+  /me/calendar:
+    get:
+      tags: [Calendar]
+      summary: Get my calendar month summary
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarMonth'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /me/calendar/{date}:
+    get:
+      tags: [Calendar]
+      summary: Get my diary entries by date
+      parameters:
+        - $ref: '#/components/parameters/Date'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarDiaryDay'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /users/{userId}:
     get:
       tags: [Users]
@@ -521,6 +676,19 @@ components:
       required: true
       schema:
         type: string
+    TagName:
+      name: tagName
+      in: path
+      required: true
+      schema:
+        type: string
+    Date:
+      name: date
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date
   responses:
     BadRequest:
       description: Bad Request
@@ -579,8 +747,18 @@ components:
           type: string
         bio:
           type: string
+          nullable: true
         primaryTeamId:
           type: string
+          nullable: true
+    UpdateFavoriteTeamsRequest:
+      type: object
+      required: [teamIds]
+      properties:
+        teamIds:
+          type: array
+          items:
+            type: string
     UserDetail:
       type: object
       required: [id, email, displayName]
@@ -602,6 +780,27 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/Team'
+        favoriteTeams:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteTeam'
+    FavoriteTeam:
+      type: object
+      required: [id, userId, sport, league, team, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        sport:
+          $ref: '#/components/schemas/Sport'
+        league:
+          $ref: '#/components/schemas/League'
+        team:
+          $ref: '#/components/schemas/Team'
+        createdAt:
+          type: string
+          format: date-time
     Sport:
       type: object
       required: [id, name, slug]
@@ -744,6 +943,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FanRating'
+        ratingDistribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingBucket'
+        ratingDistributionByFanPerspective:
+          type: array
+          items:
+            $ref: '#/components/schemas/FanRatingDistribution'
         mvpLeaders:
           type: array
           items:
@@ -766,6 +973,33 @@ components:
           type: number
         reviewCount:
           type: integer
+    FanRatingDistribution:
+      allOf:
+        - $ref: '#/components/schemas/FanRating'
+        - type: object
+          required: [ratingDistribution]
+          properties:
+            ratingDistribution:
+              type: array
+              items:
+                $ref: '#/components/schemas/RatingBucket'
+            emotionDistribution:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmotionCount'
+    RatingBucket:
+      type: object
+      required: [rating, count]
+      properties:
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          multipleOf: 0.5
+        count:
+          type: integer
+        percentage:
+          type: number
     MvpLeader:
       type: object
       required: [player, voteCount]
@@ -802,6 +1036,30 @@ components:
           type: string
         tagType:
           $ref: '#/components/schemas/TagType'
+    TagSearchResult:
+      type: object
+      required: [tag, reviewCount, matchCount]
+      properties:
+        tag:
+          $ref: '#/components/schemas/Tag'
+        reviewCount:
+          type: integer
+        matchCount:
+          type: integer
+    TagDetail:
+      type: object
+      required: [tag, reviewCount, matchCount, topMatches]
+      properties:
+        tag:
+          $ref: '#/components/schemas/Tag'
+        reviewCount:
+          type: integer
+        matchCount:
+          type: integer
+        topMatches:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchSummary'
     CreateMatchLogRequest:
       type: object
       required: [watchedAt, watchType, fanPerspective]
@@ -1116,6 +1374,84 @@ components:
           type: integer
         total:
           type: integer
+    TagPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSearchResult'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    DateMatchPage:
+      type: object
+      required: [date, items, page, size, total]
+      properties:
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    CalendarDaySummary:
+      type: object
+      required: [date, logCount, reviewCount]
+      properties:
+        date:
+          type: string
+          format: date
+        logCount:
+          type: integer
+        reviewCount:
+          type: integer
+        averageRating:
+          type: number
+          nullable: true
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchSummary'
+    CalendarMonth:
+      type: object
+      required: [month, days]
+      properties:
+        month:
+          type: string
+          pattern: '^\d{4}-\d{2}$'
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarDaySummary'
+    CalendarDiaryDay:
+      type: object
+      required: [date, entries, logCount, reviewCount]
+      properties:
+        date:
+          type: string
+          format: date
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchLogAggregate'
+        logCount:
+          type: integer
+        reviewCount:
+          type: integer
+        averageRating:
+          type: number
+          nullable: true
     ErrorResponse:
       type: object
       required: [code, message]

@@ -14,7 +14,7 @@ export function rect(name: string, w: number, h: number, fill: string) {
   node.name = name;
   node.resize(w, h);
   node.fills = [paint(fill)];
-  node.cornerRadius = 6;
+  node.cornerRadius = 10;
   return node;
 }
 
@@ -54,7 +54,7 @@ export function buttonFrame(name: string, label: string, fill: string, color: st
   node.paddingRight = 18;
   node.paddingTop = 12;
   node.paddingBottom = 12;
-  node.cornerRadius = 8;
+  node.cornerRadius = 999;
   node.appendChild(text(label, 14, "Semi", color));
   return node;
 }
@@ -65,7 +65,7 @@ export function chip(label: string, active = false) {
   node.paddingRight = 14;
   node.paddingTop = 8;
   node.paddingBottom = 8;
-  node.cornerRadius = 18;
+  node.cornerRadius = 999;
   node.strokes = [paint(active ? C.primary : C.line)];
   node.appendChild(text(label, 12, "Medium", active ? "#FFFFFF" : C.ink));
   return node;
@@ -83,7 +83,7 @@ export function auto(node: FrameNode | ComponentNode, mode: "HORIZONTAL" | "VERT
 }
 
 export function decorate(node: FrameNode | ComponentNode) {
-  node.cornerRadius = 12;
+  node.cornerRadius = 20;
   node.strokes = [paint(C.line)];
   node.strokeWeight = 1;
 }

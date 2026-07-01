@@ -211,11 +211,14 @@ eSports
 - 경기 정보
 - 리뷰
 - 평점
+- 개인 별점 분포
 - MVP
 - 감정
 - 태그
 
 가 집계된다.
+
+경기 검색 결과에서 선택한 경기는 `/matches/{matchId}` 상세 페이지로 이동한다.
 
 ---
 
@@ -255,6 +258,8 @@ eSports
 - 원정팬
 - 타팀 팬
 - 중립 팬
+
+평균 평점 외에도 1.0~5.0 구간별 별점 분포를 표시한다.
 
 ---
 
@@ -312,6 +317,8 @@ eSports
 - 심장아프다
 - 최고의직관
 
+태그는 검색 가능해야 하며, 태그를 선택하면 `/tags/{tagName}` 검색 결과 페이지로 이동한다.
+
 ---
 
 ## Likes
@@ -362,6 +369,8 @@ eSports
 - 좋아요 수
 - 응원팀
 
+응원팀은 하나로 제한하지 않는다. 사용자는 리그별로 여러 응원팀을 선택할 수 있고, `/profile/favorite-teams`에서 관리한다.
+
 ---
 
 ## Timeline
@@ -388,6 +397,37 @@ Timeline은
 - 태그
 - 리뷰 요약
 - MVP
+
+---
+
+## Calendar / Diary
+
+사용자는 달력으로 자신의 기록을 돌아본다.
+
+Calendar는 월별 기록 유무, 기록 수, 리뷰 수, 평균 별점을 요약한다.
+
+날짜를 선택하면 해당 일자의 MatchLogAggregate 목록을 Diary 형태로 보여준다.
+
+지원 라우트
+
+- `/calendar`
+- `/calendar?date=YYYY-MM-DD`
+
+---
+
+## Date Match Browse
+
+사용자는 특정 일자의 경기를 한 화면에서 모아본다.
+
+지원 라우트
+
+- `/games/date/YYYY-MM-DD`
+
+필터
+
+- 응원팀
+- 종목
+- 리그
 
 ---
 
@@ -476,8 +516,14 @@ Verified Attendance 제공
 - 회원가입
 - 프로필
 - 경기 검색
+- 경기 검색 결과 상세 페이지
+- 태그 검색
+- 태그 기반 경기 목록
+- 일자별 경기 모아보기
+- Calendar / Diary
 - 리뷰
 - 평점
+- 별점 분포
 - 태그
 - 좋아요
 - MVP
@@ -485,6 +531,7 @@ Verified Attendance 제공
 - 팬 관점
 - Timeline
 - 통계
+- 리그별 다중 응원팀 관리
 
 ---
 
@@ -494,7 +541,6 @@ Verified Attendance 제공
 - AI 경기 요약
 - 하이라이트 연동
 - 친구 비교
-- Diary
 - Fantasy League 연동
 - Apple Wallet 티켓 연동
 - Google Wallet 티켓 연동

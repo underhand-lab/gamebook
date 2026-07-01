@@ -24,23 +24,46 @@ function mainContent(spec: ScreenSpec) {
   titleBox.appendChild(text(spec.name, 32, "Bold"));
   titleBox.appendChild(text(spec.subtitle, 14, "Regular", C.muted));
   header.appendChild(titleBox);
-  header.appendChild(buttonFrame("Primary CTA", "Record Match", C.primary, "#FFFFFF"));
+  header.appendChild(buttonFrame("Primary CTA", spec.ctaLabel, C.primary, "#FFFFFF"));
 
   main.appendChild(header);
   main.appendChild(tabBar(spec.tabs));
-  main.appendChild(metricRow(spec.metrics));
+  if (!spec.hideMetrics) {
+    main.appendChild(metricRow(spec.metrics));
+  }
 
-  const grid = row(`${spec.name} / Content Grid`, 24);
-  spec.panels.forEach((panel, index) => grid.appendChild(panelFrame(panel, index === 0 ? 456 : 286)));
-  main.appendChild(grid);
+  main.appendChild(spec.name === "Profile" ? profileGrid(spec) : defaultGrid(spec));
   return main;
+}
+
+function defaultGrid(spec: ScreenSpec) {
+  const grid = row(`${spec.name} / Content Grid`, 24);
+  spec.panels.forEach((panel, index) => {
+    grid.appendChild(panelFrame(panel, index === 0 ? 456 : 286));
+  });
+  return grid;
+}
+
+function profileGrid(spec: ScreenSpec) {
+  const grid = row(`${spec.name} / Split Grid`, 24);
+  const left = stack("Profile Left", 456, 16);
+  const right = stack("Profile Right", 520, 16);
+
+  left.appendChild(panelFrame(spec.panels[0], 456));
+  right.appendChild(panelFrame(spec.panels[1], 520));
+  right.appendChild(panelFrame(spec.panels[2], 520));
+  right.appendChild(panelFrame(spec.panels[3], 520));
+
+  grid.appendChild(left);
+  grid.appendChild(right);
+  return grid;
 }
 function sidebar(active: string) {
   const node = stack("Sidebar Navigation", SIDEBAR, 12, 24, C.dark);
   node.resize(SIDEBAR, HEIGHT);
   node.counterAxisSizingMode = "FIXED";
   node.appendChild(text("gamelog", 24, "Bold", "#FFFFFF"));
-  node.appendChild(text("Remember Every Game.", 12, "Regular", "#B7C0CE"));
+  node.appendChild(text("micro posts for games", 12, "Regular", "#B7C0CE"));
   nav.forEach(item => node.appendChild(navItem(item, item === active)));
   return node;
 }
@@ -49,7 +72,7 @@ function navItem(label: string, active: boolean) {
   item.resize(208, 40);
   item.paddingLeft = 12;
   item.paddingRight = 12;
-  item.cornerRadius = 8;
+  item.cornerRadius = 999;
   item.appendChild(rect("Icon", 16, 16, active ? "#FFFFFF" : "#6B7280"));
   item.appendChild(text(label, 13, "Medium", active ? "#FFFFFF" : "#D1D5DB"));
   return item;
@@ -59,7 +82,7 @@ function metricRow(items: string[]) {
   items.forEach(item => {
     const metric = cardFrame(`Metric / ${item}`, 250);
     metric.appendChild(text(item, 16, "Bold"));
-    metric.appendChild(text("Auto-generated summary", 12, "Regular", C.muted));
+    metric.appendChild(text("현재 앱 구조 기준 요약", 12, "Regular", C.muted));
     node.appendChild(metric);
   });
   return node;
@@ -89,16 +112,16 @@ function matchRow(label: string) {
   node.appendChild(rect("Team thumbnail", 48, 48, C.primarySoft));
   const copy = stack("Match copy", 160, 4);
   copy.appendChild(text(label, 14, "Semi"));
-  copy.appendChild(text("Rating, tags, fan perspective", 11, "Regular", C.muted));
+  copy.appendChild(text("평점, 감정, 태그, 팬 관점", 11, "Regular", C.muted));
   node.appendChild(copy);
   return node;
 }
 function reviewRow(label: string) {
   const node = stack(`Review Card / ${label}`, 244, 8, 14, C.surface);
   decorate(node);
-  node.appendChild(text("4.5 / Home fan", 12, "Semi", C.primary));
+  node.appendChild(text("4.5 / 홈팀 팬", 12, "Semi", C.primary));
   node.appendChild(text(label, 14, "Medium"));
-  node.appendChild(text("Likes, spoiler, emotion, tags", 11, "Regular", C.muted));
+  node.appendChild(text("좋아요, 스포일러, 감정, 태그", 11, "Regular", C.muted));
   return node;
 }
 function chipCloud(items: string[]) {
@@ -110,7 +133,7 @@ function chipCloud(items: string[]) {
 }
 function scoreboard(items: string[]) {
   const node = stack("Scoreboard", 440, 16, 20, C.primarySoft);
-  node.cornerRadius = 12;
+  node.cornerRadius = 20;
   node.appendChild(text(items[0], 28, "Bold", C.primary));
   node.appendChild(text(items[1], 28, "Bold", C.ink));
   node.appendChild(text(items[2], 13, "Regular", C.muted));
@@ -138,13 +161,14 @@ function inputRow(label: string) {
   return field;
 }
 function profileBlock(items: string[]) {
-  const node = stack("Profile Block", 244, 12);
+  const node = stack("Profile Block", 420, 12);
   node.appendChild(rect("Avatar", 72, 72, C.primarySoft));
+  node.appendChild(text("넓은 화면에서는 좌측 프로필 정보 영역", 12, "Regular", C.muted));
   items.forEach(item => node.appendChild(text(item, 14, "Medium")));
   return node;
 }
 function mapBlock(items: string[]) {
-  const map = frame("Editable Map Wireframe", 420, 320, "#EEF2F7");
+  const map = frame("Editable Map Wireframe", 420, 320, C.surface);
   decorate(map);
   [40, 140, 260, 360].forEach((x, index) => {
     const pin = rect(`Map Pin / ${items[index]}`, 18, 18, C.primary);
@@ -185,7 +209,7 @@ function listRow(label: string) {
 }
 function wrappedCard(label: string) {
   const node = stack(`Wrapped Card / ${label}`, 244, 10, 16, C.primary);
-  node.cornerRadius = 14;
+  node.cornerRadius = 20;
   node.appendChild(text(label, 18, "Bold", "#FFFFFF"));
   node.appendChild(text("Annual memory module", 12, "Regular", "#DCEBFF"));
   return node;
