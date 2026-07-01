@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "favorite_teams")
+@Table(name = "gamebook_favorite_teams")
 public class FavoriteTeamEntity {
   @Id
   private String id;

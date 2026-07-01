@@ -2,45 +2,37 @@
 
 ## Goal
 
-- GitHub Actions 배포 워크플로우를 제거하고, Vercel/Render의 자동 배포만 사용한다.
+- 같은 Supabase DB를 공유해도 충돌하지 않도록 현재 프로젝트 JPA 테이블에 `gamebook_` 접두사를 붙인다.
 
 ## Plan
 
-- [x] 현재 프론트/백엔드 배포 경로와 필요한 환경변수를 확인한다.
-- [x] Vercel용 프론트 배포 워크플로우를 추가한다.
-- [x] Render용 백엔드 배포 워크플로우를 추가한다.
-- [x] Render Dockerfile을 추가한다.
-- [x] 배포에 필요한 설정과 주석을 정리한다.
-- [x] 가능한 범위에서 빌드/검증을 1회 수행한다.
-- [x] GitHub Actions 배포 워크플로우를 제거한다.
+- [x] 기존 JPA 테이블명과 SQL 사용 여부를 확인한다.
+- [x] 엔티티 `@Table` 이름에 `gamebook_` 접두사를 적용한다.
+- [x] 표준 검증 workflow를 1회 실행한다.
+- [x] 결과와 남은 배포 설정을 `working.md`에 기록한다.
 
 ## Progress
 
-- 프론트는 `NEXT_PUBLIC_API_BASE_URL`로 Mock API 또는 실제 API를 선택하도록 되어 있다.
-- 백엔드는 `backend/` 하위 Gradle 프로젝트로 분리되어 있고, 현재 Kotlin DSL을 사용한다.
-- Vercel과 Render의 자동 배포가 이미 동작하면 GitHub Actions 배포 workflow는 중복이므로 제거한다.
-- Render는 `Docker` 런타임으로 배포하고, 백엔드 루트에 `Dockerfile`을 둔다.
-- 백엔드 CORS는 쉼표로 구분한 여러 origin을 허용한다.
-- 백엔드 저장소는 PostgreSQL로 전환할 수 있도록 정리했다.
-- `frontend`는 `npm run build`가 통과했다.
-- 백엔드는 `backend/Dockerfile`로 Render Docker 런타임에 맞췄다.
+- 네이티브 SQL은 없고 JPA 엔티티의 `@Table` 이름만 사용한다.
+- 기존 테이블명은 `sports`, `leagues`, `teams`, `matches`, `reviews`, `users`, `favorite_teams`이다.
+- 엔티티 테이블명을 `gamebook_sports`, `gamebook_leagues`, `gamebook_teams`, `gamebook_matches`, `gamebook_reviews`, `gamebook_users`, `gamebook_favorite_teams`로 변경했다.
+- `./gradlew test`는 기본 Java 환경에서 `26` 오류로 실패했다.
+- Java 24 지정 후 `/bin/zsh -lc "JAVA_HOME=/Users/easyh/Library/Java/JavaVirtualMachines/temurin-24.0.2/Contents/Home ./gradlew test"`가 통과했다.
+- 테스트 로그에서 Hibernate가 `gamebook_*` 테이블을 사용함을 확인했다.
 
 ## Decisions
 
-- 프론트 배포는 Vercel, 백엔드 배포는 Render의 기본 자동 배포를 사용한다.
-- GitHub Actions 배포 workflow는 중복될 경우 제거한다.
-- 배포 설정은 기존 동작을 바꾸지 않고, 환경변수와 시크릿 기반으로 연결한다.
+- 프로젝트 접두사는 저장소/배포명 기준으로 `gamebook_`를 사용한다.
+- 기존 공유 DB의 다른 프로젝트 테이블은 건드리지 않고 새 prefixed 테이블을 생성하도록 한다.
 
 ## Pending
 
-- Vercel 프로젝트 설정 값과 Render Docker 서비스 환경변수, GitHub Secrets 값은 사용자가 채워야 한다.
-- Supabase를 쓰면 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`를 Supabase의 PostgreSQL 연결 값으로 바꿔야 한다.
-- 배포 후 실제 도메인과 환경변수 연결 확인이 남아 있다.
-- 백엔드 검증은 이 환경에서 Gradle 배포본 다운로드가 막혀 완료하지 못했다.
+- Render 재배포 후 Supabase에 `gamebook_*` 테이블이 생성되는지 확인해야 한다.
 
 ## Issues
 
-- `./gradlew test`는 로컬 Gradle 배포본 경로 권한 문제를 우회한 뒤, 외부 네트워크 차단으로 `services.gradle.org`에서 Gradle 배포본을 내려받지 못해 실패했다.
+- 기존 unprefixed 테이블의 데이터는 새 `gamebook_` 테이블로 자동 이전되지 않는다.
+- 로컬 기본 Java 환경은 Gradle 실행에 부적합해 Java 24 지정이 필요했다.
 
 ## Change Log
 
@@ -53,3 +45,8 @@
 - 2026-07-01: Vercel/Render 배포용 GitHub Actions 작업 시작.
 - 2026-07-01: 프론트 Vercel 배포 워크플로우와 백엔드 Render 배포 워크플로우 추가.
 - 2026-07-01: 자동 배포가 이미 동작해 GitHub Actions 배포 워크플로우 제거 작업으로 전환.
+- 2026-07-01: Render 배포 실패 원인 진단 작업 시작.
+- 2026-07-01: Render 배포 실패 원인을 Supabase 직접 연결 IPv6 접근 실패로 정리.
+- 2026-07-01: 새 Render 로그를 `leagues.code` NOT NULL 제약과 현재 엔티티 불일치로 정리.
+- 2026-07-01: JPA 테이블명에 `gamebook_` 접두사 적용 작업 시작.
+- 2026-07-01: JPA 테이블명 `gamebook_` 접두사 적용 및 Java 24 기반 테스트 통과.
