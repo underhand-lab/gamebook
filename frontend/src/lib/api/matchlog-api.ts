@@ -45,6 +45,13 @@ export type UserSummary = {
   id: string;
   displayName: string;
   avatarUrl?: string | null;
+  handle?: string;
+  actorUrl?: string;
+  inboxUrl?: string;
+  outboxUrl?: string;
+  followersUrl?: string;
+  followingUrl?: string;
+  isLocalUser?: boolean;
 };
 
 export type UserDetail = UserSummary & {
@@ -207,13 +214,20 @@ export type MatchLog = {
 
 export type CreateReviewRequest = {
   matchLogId: string;
-  rating: number;
+  rating?: number;
   title?: string | null;
   body?: string | null;
   spoiler?: boolean;
   emotion?: Emotion | null;
   fanPerspective: FanPerspective;
   userTagNames?: string[];
+  visibility?: ReviewVisibility;
+  federated?: boolean;
+  watchedType?: ReviewWatchedType;
+  canonicalUrl?: string | null;
+  activityPubObjectUrl?: string | null;
+  activityPubActivityUrl?: string | null;
+  federationStatus?: FederationStatus;
 };
 
 export type UpdateReviewRequest = {
@@ -223,13 +237,32 @@ export type UpdateReviewRequest = {
   spoiler?: boolean;
   emotion?: Emotion | null;
   userTagNames?: string[];
+  visibility?: ReviewVisibility;
+  federated?: boolean;
+  watchedType?: ReviewWatchedType;
+  canonicalUrl?: string | null;
+  activityPubObjectUrl?: string | null;
+  activityPubActivityUrl?: string | null;
+  federationStatus?: FederationStatus;
 };
+
+export type ReviewVisibility = "public" | "local" | "followers" | "private";
+export type ReviewWatchedType =
+  | "live"
+  | "tv"
+  | "highlight"
+  | "memory"
+  | "rewatch"
+  | "radio"
+  | "unknown";
+export type FederationStatus = "none" | "pending" | "published" | "failed";
 
 export type Review = {
   id: string;
   matchId: string;
+  gameId: string;
   user: UserSummary;
-  rating: number;
+  rating?: number;
   title?: string | null;
   body?: string | null;
   spoiler: boolean;
@@ -240,6 +273,14 @@ export type Review = {
   likedByMe: boolean;
   createdAt: string;
   updatedAt?: string;
+  visibility: ReviewVisibility;
+  federated: boolean;
+  watchedType?: ReviewWatchedType;
+  canonicalUrl?: string | null;
+  activityPubObjectUrl?: string | null;
+  activityPubActivityUrl?: string | null;
+  federatedAt?: string | null;
+  federationStatus?: FederationStatus;
 };
 
 export type UpsertMvpVoteRequest = {

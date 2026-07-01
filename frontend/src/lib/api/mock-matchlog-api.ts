@@ -238,8 +238,8 @@ export const mockMatchlogApi: MatchlogApi = {
     const sort = params.sort ?? "LATEST";
     items = [...items].sort((a, b) => {
       if (sort === "MOST_LIKED") return b.likeCount - a.likeCount;
-      if (sort === "RATING_HIGH") return b.rating - a.rating;
-      if (sort === "RATING_LOW") return a.rating - b.rating;
+      if (sort === "RATING_HIGH") return (b.rating ?? 0) - (a.rating ?? 0);
+      if (sort === "RATING_LOW") return (a.rating ?? 0) - (b.rating ?? 0);
       return Date.parse(b.createdAt) - Date.parse(a.createdAt);
     });
     return page(items, params);

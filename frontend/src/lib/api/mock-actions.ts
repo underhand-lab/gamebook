@@ -30,6 +30,20 @@ import {
   toSummary,
 } from "./mock-runtime";
 
+function reviewDefaults(matchId: string) {
+  return {
+    gameId: matchId,
+    visibility: "public" as const,
+    federated: false,
+    watchedType: "unknown" as const,
+    canonicalUrl: null,
+    activityPubObjectUrl: null,
+    activityPubActivityUrl: null,
+    federatedAt: null,
+    federationStatus: "none" as const,
+  };
+}
+
 export function updateProfile(payload: UpdateProfileRequest) {
   state.me = {
     ...state.me,
@@ -135,10 +149,18 @@ export function createReview(matchId: string, payload: CreateReviewRequest) {
   const review: Review = {
     id: `review-${matchId}-${Date.now()}`,
     matchId,
+    ...reviewDefaults(matchId),
     user: {
       id: state.me.id,
       displayName: state.me.displayName,
       avatarUrl: state.me.avatarUrl,
+      handle: state.me.handle,
+      actorUrl: state.me.actorUrl,
+      inboxUrl: state.me.inboxUrl,
+      outboxUrl: state.me.outboxUrl,
+      followersUrl: state.me.followersUrl,
+      followingUrl: state.me.followingUrl,
+      isLocalUser: state.me.isLocalUser,
     },
     rating: payload.rating,
     title: payload.title ?? null,
@@ -151,6 +173,14 @@ export function createReview(matchId: string, payload: CreateReviewRequest) {
     likedByMe: false,
     createdAt: now,
     updatedAt: now,
+    visibility: payload.visibility ?? "public",
+    federated: payload.federated ?? false,
+    watchedType: payload.watchedType ?? "unknown",
+    canonicalUrl: payload.canonicalUrl ?? null,
+    activityPubObjectUrl: payload.activityPubObjectUrl ?? null,
+    activityPubActivityUrl: payload.activityPubActivityUrl ?? null,
+    federatedAt: payload.federated ? now : null,
+    federationStatus: payload.federationStatus ?? "none",
   };
   state.reviews = [review, ...state.reviews];
   return clone(review);
@@ -168,6 +198,21 @@ export function updateReview(reviewId: string, payload: UpdateReviewRequest) {
     emotion: payload.emotion === undefined ? existing.emotion : payload.emotion,
     tags: payload.userTagNames ? tagsFromNames(payload.userTagNames) : existing.tags,
     updatedAt: new Date().toISOString(),
+    visibility: payload.visibility ?? existing.visibility,
+    federated: payload.federated ?? existing.federated,
+    watchedType: payload.watchedType ?? existing.watchedType,
+    canonicalUrl:
+      payload.canonicalUrl === undefined ? existing.canonicalUrl : payload.canonicalUrl,
+    activityPubObjectUrl:
+      payload.activityPubObjectUrl === undefined
+        ? existing.activityPubObjectUrl
+        : payload.activityPubObjectUrl,
+    activityPubActivityUrl:
+      payload.activityPubActivityUrl === undefined
+        ? existing.activityPubActivityUrl
+        : payload.activityPubActivityUrl,
+    federatedAt: payload.federated ? new Date().toISOString() : existing.federatedAt,
+    federationStatus: payload.federationStatus ?? existing.federationStatus,
   };
   state.reviews = state.reviews.map((review) =>
     review.id === reviewId ? updated : review,

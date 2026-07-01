@@ -23,7 +23,7 @@ import type {
   UserStatOption,
   UserStats,
 } from "@/lib/api";
-import { emotionLabel, normalizeEmotionCounts } from "@/lib/labels";
+import { normalizeEmotionCounts } from "@/lib/labels";
 
 type StatScope = {
   leagueId: string;
@@ -119,12 +119,15 @@ export function ProfileTab({
         <Card className="border-border/70 bg-card/90 shadow-sm shadow-black/5">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <h3 className="text-2xl font-semibold tracking-tight">
-                  {user.displayName}
-                </h3>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-              </div>
+            <div className="space-y-1">
+              <h3 className="text-2xl font-semibold tracking-tight">
+                {user.displayName}
+              </h3>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+              {user.handle ? (
+                <p className="text-sm text-muted-foreground">{user.handle}</p>
+              ) : null}
+            </div>
               {headerAction ? (
                 <Button onClick={headerAction.onClick} size="sm">
                   {headerAction.label}
@@ -134,6 +137,14 @@ export function ProfileTab({
             <p className="text-sm leading-6 text-muted-foreground">
               {user.bio ?? "소개가 없습니다."}
             </p>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">ActivityPub</p>
+              <div className="flex flex-col gap-1 text-sm">
+                <span>Actor: {user.actorUrl ?? "준비 중"}</span>
+                <span>Handle: {user.handle ?? "준비 중"}</span>
+                <span>연동 상태: {user.actorUrl ? "연결 가능" : "미연동"}</span>
+              </div>
+            </div>
             <div className="space-y-2">
               <div>
                 <p className="flex items-center gap-2 text-xs text-muted-foreground">

@@ -99,10 +99,11 @@ export function toSummary(match: MatchDetail): MatchSummary {
   };
 }
 
-export function average(items: number[]) {
-  if (!items.length) return 0;
+export function average(items: Array<number | undefined>) {
+  const values = items.filter((item): item is number => typeof item === "number");
+  if (!values.length) return 0;
 
-  const value = items.reduce((sum, item) => sum + item, 0) / items.length;
+  const value = values.reduce((sum, item) => sum + item, 0) / values.length;
   return Number(value.toFixed(1));
 }
 

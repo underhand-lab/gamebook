@@ -23,6 +23,8 @@ import {
   type MatchLog,
   type MatchSummary,
   type Review,
+  type ReviewVisibility,
+  type ReviewWatchedType,
   type WatchType,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -36,12 +38,19 @@ type FormState = {
   reviewText: string;
   emotion: "" | Emotion;
   userTagNames: string;
+  visibility: ReviewVisibility;
+  federated: boolean;
+  watchedType: ReviewWatchedType;
 };
 
-const watchTypeOptions: { value: WatchType; label: string }[] = [
-  { value: "LIVE", label: "라이브" },
-  { value: "IN_PERSON", label: "직관" },
-  { value: "OTHER", label: "하이라이트" },
+const reviewWatchOptions: { value: ReviewWatchedType; label: string }[] = [
+  { value: "live", label: "직관" },
+  { value: "tv", label: "중계" },
+  { value: "highlight", label: "하이라이트" },
+  { value: "memory", label: "기억" },
+  { value: "rewatch", label: "재관람" },
+  { value: "radio", label: "라디오" },
+  { value: "unknown", label: "선택 안 함" },
 ];
 
 const emotionOptions: { value: Emotion; label: string }[] = [
@@ -109,6 +118,9 @@ function buildFormState(
     reviewText: initialReview?.body ?? initialReview?.title ?? "",
     emotion: initialReview?.emotion ?? "",
     userTagNames: userTagText(initialReview),
+    visibility: initialReview?.visibility ?? "public",
+    federated: initialReview?.federated ?? false,
+    watchedType: initialReview?.watchedType ?? "unknown",
   };
 }
 
@@ -268,7 +280,14 @@ export function MatchLogForm({
         .map((tag) => tag.trim())
         .filter(Boolean);
 
-      const shouldSaveReview = Boolean(form.rating);
+      const shouldSaveReview =
+        Boolean(form.rating) ||
+        Boolean(form.reviewText.trim()) ||
+        Boolean(form.userTagNames.trim()) ||
+        Boolean(form.emotion) ||
+        form.visibility !== "public" ||
+        form.federated ||
+        form.watchedType !== "unknown";
 
       if (existingReview && shouldSaveReview) {
         await matchlogApi.updateReview(existingReview.id, {
@@ -278,17 +297,24 @@ export function MatchLogForm({
           spoiler: false,
           emotion: form.emotion || null,
           userTagNames,
+          visibility: form.visibility,
+          federated: form.federated,
+          watchedType: form.watchedType,
         });
       } else if (shouldSaveReview) {
         await matchlogApi.createReview(activeMatch.id, {
           matchLogId: log.id,
-          rating: Number(form.rating),
+          rating: form.rating ? Number(form.rating) : undefined,
           title: null,
           body: form.reviewText || null,
           spoiler: false,
           emotion: form.emotion || null,
           fanPerspective: form.fanPerspective,
           userTagNames,
+          visibility: form.visibility,
+          federated: form.federated,
+          watchedType: form.watchedType,
+          federationStatus: form.federated ? "pending" : "none",
         });
       }
 
@@ -409,14 +435,46 @@ export function MatchLogForm({
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label>공개 범위</Label>
+                    <PillRadioGroup
+                      columnsClassName="grid-cols-2 sm:grid-cols-4"
+                      name="visibility"
+                      options={[
+                        { value: "public", label: "공개" },
+                        { value: "local", label: "앱 공개" },
+                        { value: "followers", label: "팔로워" },
+                        { value: "private", label: "비공개" },
+                      ]}
+                      value={form.visibility}
+                      onChange={(value) =>
+                        setForm({ ...form, visibility: value as ReviewVisibility })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fediverse 공개</Label>
+                    <PillRadioGroup
+                      columnsClassName="grid-cols-2"
+                      name="federated"
+                      options={[
+                        { value: "false", label: "아니오" },
+                        { value: "true", label: "예" },
+                      ]}
+                      value={String(form.federated)}
+                      onChange={(value) =>
+                        setForm({ ...form, federated: value === "true" })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label>관람 방식</Label>
                     <PillRadioGroup
-                      columnsClassName="grid-cols-3"
-                      name="watchType"
-                      options={watchTypeOptions}
-                      value={form.watchType}
+                      columnsClassName="grid-cols-2 sm:grid-cols-4"
+                      name="watchedType"
+                      options={reviewWatchOptions}
+                      value={form.watchedType}
                       onChange={(value) =>
-                        setForm({ ...form, watchType: value as WatchType })
+                        setForm({ ...form, watchedType: value as ReviewWatchedType })
                       }
                     />
                   </div>

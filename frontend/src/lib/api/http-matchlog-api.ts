@@ -42,6 +42,7 @@ import type {
   UserStatOptions,
   UserStats,
 } from "./matchlog-api";
+import { getApiBaseUrl } from "./client";
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -58,7 +59,7 @@ function query(params?: Record<string, Primitive>) {
 
 export class HttpMatchlogApi implements MatchlogApi {
   constructor(
-    private readonly baseUrl = "/api/v1",
+    private readonly baseUrl = getApiBaseUrl(),
     private readonly getToken?: () => string | undefined,
   ) {}
 
