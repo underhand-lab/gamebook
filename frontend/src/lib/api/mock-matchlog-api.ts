@@ -10,6 +10,7 @@ import type {
   PostFeedItem,
   PostFeedParams,
   ReviewSearchParams,
+  UserDetail,
 } from "./matchlog-api";
 import {
   createOrUpdateLog,
@@ -58,17 +59,11 @@ export const mockMatchlogApi: MatchlogApi = {
     await wait();
     const exists = state.users.some((user) => user.email === payload.email);
     if (exists) throw new Error("Email already exists");
-    const user = {
+    const user: UserDetail = {
       id: `user-${Date.now()}`,
       email: payload.email,
       displayName: payload.displayName,
       avatarUrl: null,
-      handle: null,
-      actorUrl: null,
-      inboxUrl: null,
-      outboxUrl: null,
-      followersUrl: null,
-      followingUrl: null,
       isLocalUser: true,
       bio: "새로 가입한 사용자",
       primaryTeam: null,

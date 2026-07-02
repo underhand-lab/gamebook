@@ -2,23 +2,24 @@
 
 ## Goal
 
-- 공용 필 라디오의 비선택 상태 테두리를 제거해 프로젝트 전체 파란 라디오 버튼 디자인을 정리한다.
+- Vercel 프론트 배포 실패 원인을 로컬 빌드로 재현하고, 타입 오류를 수정해 `next build`가 통과하게 만든다.
 
 ## Plan
 
-- [x] 공용 필 라디오의 기본 비선택 테두리 스타일을 확인한다.
-- [x] 공용 `RadioPillGroup` 전체에서 비선택 상태 테두리를 제거한다.
+- [x] 로컬에서 `npm run build`로 Vercel 실패를 재현한다.
+- [x] 빌드 실패를 일으키는 타입 오류를 수정한다.
 - [x] 저장소 표준 검증을 1회 실행하고 `working.md`에 결과를 기록한다.
 
 ## Progress
 
-- 새 요청 확인: 제거 대상은 선택 상태가 아니라 비선택 상태의 기본 테두리이며, 공용 라디오 전체에 반영해야 한다.
-- 공용 `RadioPillGroup`의 기본 `border`를 제거해 프로젝트 전체의 파란 필 라디오 버튼에 동일하게 반영했다.
-- `frontend`에서 `npm run lint`를 1회 실행했고 통과했다.
+- 로컬 `frontend`에서 `npm run build`를 실행해 Vercel 실패를 재현했다.
+- 현재 첫 실패 지점은 `frontend/src/lib/api/mock-matchlog-api.ts`의 `signup` 응답이며, `handle: null` 같은 값이 `UserDetail` 타입과 충돌한다.
+- `signup` mock 응답을 `UserDetail` 타입에 맞게 수정해 optional string 필드의 `null` 할당을 제거했다.
+- 수정 후 `frontend`에서 `npm run build`를 다시 실행했고 통과했다.
 
 ## Decisions
 
-- 공용 `RadioPillGroup` 항목은 비선택 상태에서 개별 테두리를 두지 않고, 선택 상태는 배경/텍스트색으로만 구분한다.
+- Vercel 로그가 잘린 상태라 먼저 로컬 `next build` 기준 오류를 고치고 재검증한다.
 
 ## Pending
 
@@ -70,3 +71,4 @@
 - 2026-07-02: 공용 필 라디오 선택 상태의 파란 테두리를 제거.
 - 2026-07-02: 공용 필 라디오 비선택 상태 테두리 제거 작업 시작.
 - 2026-07-02: 공용 필 라디오 비선택 상태의 기본 테두리를 제거.
+- 2026-07-02: Vercel 프론트 빌드 실패 재현 및 타입 오류 수정 작업 시작.
