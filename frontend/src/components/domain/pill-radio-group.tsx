@@ -30,7 +30,7 @@ export function RadioPillGroup({
       {options.map((option) => (
         <label
           key={option.value}
-          className="flex h-10 cursor-pointer items-center justify-center rounded-full border bg-card px-3 text-sm font-medium transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground"
+          className="flex h-10 cursor-pointer items-center justify-center rounded-full bg-card px-3 text-sm font-medium transition-colors has-[:checked]:bg-primary has-[:checked]:text-primary-foreground"
         >
           <input
             checked={value === option.value}

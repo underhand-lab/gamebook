@@ -25,18 +25,20 @@ export function ProfileScreen({ userId = "user-me" }: { userId?: string }) {
     followingUserIds,
     statScope,
   } = useProfileHubData(userId, { postQuery });
-  const canEdit = userId === "user-me";
   const [editing, setEditing] = useState(false);
   if (!state) {
     return <div className="page-shell text-sm text-muted-foreground">불러오는 중</div>;
   }
+  const canEdit = state.isOwnProfile;
+  const canFollow = Boolean(state.viewer && !state.isOwnProfile);
+  const isFollowing = followingUserIds.includes(state.profileUser.id);
 
   return (
     <div className="page-shell space-y-6">
       <ProfileTab
         followerCount={followerCount}
         friendPosts={friendPosts}
-        meId="user-me"
+        meId={state.viewer?.id}
         myPosts={myPosts}
         popularPosts={popularPosts}
         postQuery={postQuery}
@@ -48,23 +50,26 @@ export function ProfileScreen({ userId = "user-me" }: { userId?: string }) {
         statLeagueOptions={statLeagueOptions}
         statTeamOptions={statTeamOptions}
         stats={state.stats}
-        user={state.me}
+        user={state.profileUser}
+        viewer={state.viewer}
         onPostQueryChange={setPostQuery}
         onScopeChange={setStatScope}
         headerAction={
           canEdit
             ? { label: "프로필 수정", onClick: () => setEditing(true) }
-            : {
-                label: followingUserIds.includes(state.me.id) ? "팔로우 취소" : "팔로우",
+            : canFollow
+              ? {
+                label: isFollowing ? "팔로우 취소" : "팔로우",
                 onClick: async () => {
-                  if (followingUserIds.includes(state.me.id)) {
-                    await matchlogApi.unfollowUser(state.me.id);
+                  if (isFollowing) {
+                    await matchlogApi.unfollowUser(state.profileUser.id);
                   } else {
-                    await matchlogApi.followUser(state.me.id);
+                    await matchlogApi.followUser(state.profileUser.id);
                   }
                   await load();
                 },
               }
+              : undefined
         }
       />
 
@@ -72,8 +77,8 @@ export function ProfileScreen({ userId = "user-me" }: { userId?: string }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-[1.5rem] bg-background p-4 shadow-2xl">
             <ProfileEditForm
-              me={state.me}
-              favoriteTeams={state.me.favoriteTeams ?? []}
+              me={state.profileUser}
+              favoriteTeams={state.profileUser.favoriteTeams ?? []}
               onSaved={() => {
                 setEditing(false);
                 void load();

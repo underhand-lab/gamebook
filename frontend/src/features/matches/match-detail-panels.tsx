@@ -147,7 +147,7 @@ export function MatchDetailPostsCard({
   onFanTabChange,
 }: {
   match: MatchDetail;
-  meId: string;
+  meId?: string;
   myItem: MatchLogAggregate | null;
   initialReviews: Review[];
   fanTab: PostFanTab;
@@ -171,12 +171,12 @@ export function MatchDetailPostsCard({
     let active = true;
 
     matchlogApi
-      .listMatchReviews(match.id, {
-        q: term,
-        excludeUserId: showMyItem ? meId : undefined,
-        fanPerspective: selectedPerspective,
-        size: 50,
-      })
+        .listMatchReviews(match.id, {
+          q: term,
+          excludeUserId: showMyItem && meId ? meId : undefined,
+          fanPerspective: selectedPerspective,
+          size: 50,
+        })
       .then((page) => {
         if (!active) return;
         setReviews(page.items);

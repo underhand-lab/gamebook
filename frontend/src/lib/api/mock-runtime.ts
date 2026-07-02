@@ -1,9 +1,9 @@
 import {
-  currentUser as seedCurrentUser,
   favoriteTeams as seedFavoriteTeams,
   logs as seedLogs,
   matches as seedMatches,
   mvpVotes as seedMvpVotes,
+  mockPasswordByEmail,
   players as seedPlayers,
   reviews as seedReviews,
   teams as seedTeams,
@@ -26,7 +26,10 @@ import type {
   Review,
   Tag,
   Team,
+  UserDetail,
 } from "./matchlog-api";
+
+const SESSION_KEY = "gamelog-mock-session-user-id";
 
 const fanPerspectives: FanPerspective[] = [
   "HOME_FAN",
@@ -42,13 +45,14 @@ export const wait = async () =>
   new Promise((resolve) => setTimeout(resolve, 120));
 
 export const state = {
-  me: clone(seedCurrentUser),
   users: clone(seedUsers),
   matches: clone(seedMatches),
   reviews: clone(seedReviews),
   logs: clone(seedLogs),
   votes: clone(seedMvpVotes),
-  favoriteTeams: clone(seedFavoriteTeams),
+  favoriteTeamsByUserId: {
+    "user-me": clone(seedFavoriteTeams),
+  } as Record<string, typeof seedFavoriteTeams>,
   followingByUserId: {
     "user-me": ["user-ana", "user-jun", "user-soo", "user-hae"],
     "user-ana": ["user-me"],
@@ -58,7 +62,63 @@ export const state = {
     "user-min": [],
   } as Record<string, string[]>,
   userTagCounter: 1,
+  sessionUserId: null as string | null,
+  accessToken: null as string | null,
+  authInitialized: false,
 };
+
+function canUseWindow() {
+  return typeof window !== "undefined";
+}
+
+export function ensureAuthInitialized() {
+  if (state.authInitialized) return;
+  state.authInitialized = true;
+  if (!canUseWindow()) return;
+  const sessionUserId = window.localStorage.getItem(SESSION_KEY);
+  state.sessionUserId = sessionUserId || null;
+  state.accessToken = sessionUserId ? `mock-token-${sessionUserId}` : null;
+}
+
+function persistSession() {
+  if (!canUseWindow()) return;
+  if (state.sessionUserId) {
+    window.localStorage.setItem(SESSION_KEY, state.sessionUserId);
+  } else {
+    window.localStorage.removeItem(SESSION_KEY);
+  }
+}
+
+export function sessionUser(): UserDetail | null {
+  ensureAuthInitialized();
+  if (!state.sessionUserId) return null;
+  return state.users.find((user) => user.id === state.sessionUserId) ?? null;
+}
+
+export function requireSessionUser(): UserDetail {
+  const user = sessionUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
+
+export function sessionFavoriteTeams() {
+  const user = sessionUser();
+  if (!user) return [];
+  return state.favoriteTeamsByUserId[user.id] ?? [];
+}
+
+export function setSessionUser(userId: string | null) {
+  ensureAuthInitialized();
+  state.sessionUserId = userId;
+  state.accessToken = userId ? `mock-token-${userId}` : null;
+  persistSession();
+}
+
+export function validateMockPassword(email: string, password: string) {
+  return mockPasswordByEmail[email] === password;
+}
 
 export function page<T>(
   items: T[],
@@ -301,21 +361,35 @@ export function timelineItem(log: MatchLog): MatchLogAggregate {
 }
 
 export function syncMySummary() {
+  const me = requireSessionUser();
   state.users = state.users.map((user) =>
-    user.id === state.me.id ? state.me : user,
+    user.id === me.id ? me : user,
   );
   state.reviews = state.reviews.map((review) =>
-    review.user.id === state.me.id
+    review.user.id === me.id
       ? {
           ...review,
           user: {
-            id: state.me.id,
-            displayName: state.me.displayName,
-            avatarUrl: state.me.avatarUrl,
+            id: me.id,
+            displayName: me.displayName,
+            avatarUrl: me.avatarUrl,
           },
         }
       : review,
   );
+}
+
+export function favoriteTeamsForUser(userId: string) {
+  return state.favoriteTeamsByUserId[userId] ?? [];
+}
+
+export function canViewerSeeReview(review: Review, viewerId?: string | null) {
+  if (review.visibility === "public" || review.visibility === "local") return true;
+  if (!viewerId) return false;
+  if (review.user.id === viewerId) return true;
+  if (review.visibility === "private") return false;
+  const following = state.followingByUserId[viewerId] ?? [];
+  return review.visibility === "followers" && following.includes(review.user.id);
 }
 
 export function rankTeams(userLogs: MatchLog[]) {

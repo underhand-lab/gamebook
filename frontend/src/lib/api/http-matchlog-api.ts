@@ -1,4 +1,6 @@
 import type {
+  AuthResponse,
+  AuthSession,
   CreateMatchLogRequest,
   CreateReviewRequest,
   DateMatchPage,
@@ -41,6 +43,8 @@ import type {
   UserSummary,
   UserStatOptions,
   UserStats,
+  LoginRequest,
+  SignupRequest,
 } from "./matchlog-api";
 import { getApiBaseUrl } from "./client";
 
@@ -83,6 +87,27 @@ export class HttpMatchlogApi implements MatchlogApi {
 
   private json(method: string, body?: unknown): RequestInit {
     return { method, body: body === undefined ? undefined : JSON.stringify(body) };
+  }
+
+  signup(payload: SignupRequest) {
+    return this.request<AuthResponse>("/auth/signup", this.json("POST", payload));
+  }
+
+  login(payload: LoginRequest) {
+    return this.request<AuthResponse>("/auth/login", this.json("POST", payload));
+  }
+
+  async logout() {
+    return undefined;
+  }
+
+  async getSession() {
+    const token = this.getToken?.();
+    if (!token) {
+      return { user: null } satisfies AuthSession;
+    }
+    const user = await this.getMe();
+    return { accessToken: token, user } satisfies AuthSession;
   }
 
   getMe() {

@@ -2,6 +2,7 @@
 
 import { CalendarPlus, Save, Search } from "lucide-react";
 import { FormEvent, type MouseEvent, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { FullDatePickerOverlay } from "@/components/domain/date-picker-overlay";
 import { ModalCardHeader } from "@/components/domain/modal-card-header";
 import { PillRadioGroup } from "@/components/domain/pill-radio-group";
@@ -12,8 +13,10 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   matchlogApi,
@@ -45,12 +48,8 @@ type FormState = {
 
 const reviewWatchOptions: { value: ReviewWatchedType; label: string }[] = [
   { value: "live", label: "직관" },
-  { value: "tv", label: "중계" },
-  { value: "highlight", label: "하이라이트" },
-  { value: "memory", label: "기억" },
-  { value: "rewatch", label: "재관람" },
-  { value: "radio", label: "라디오" },
-  { value: "unknown", label: "선택 안 함" },
+  { value: "tv", label: "라이브" },
+  { value: "unknown", label: "기타" },
 ];
 
 const emotionOptions: { value: Emotion; label: string }[] = [
@@ -169,8 +168,25 @@ export function MatchLogForm({
   );
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [canWrite, setCanWrite] = useState(Boolean(initialLog || initialReview));
   const watchedDateLocked =
-    form.watchType === "LIVE" || form.watchType === "IN_PERSON";
+    form.watchedType !== "unknown" &&
+    (form.watchType === "LIVE" || form.watchType === "IN_PERSON");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    matchlogApi.getSession().then((session) => {
+      if (active) setCanWrite(Boolean(session.user));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (favoriteTeams) {
@@ -326,31 +342,15 @@ export function MatchLogForm({
     }
   }
 
-  return (
-    <>
-      <Button
-        className={cn(
-          fixed && "fixed bottom-5 right-5 z-40 shadow-lg sm:bottom-8 sm:right-8",
-          triggerClassName,
-        )}
-        size={triggerSize}
-        type="button"
-        variant={triggerVariant}
-        onClick={openModal}
-        onKeyDown={(event) => event.stopPropagation()}
-      >
-        <CalendarPlus className="h-4 w-4" />
-        {buttonLabel ?? (resolvedLog ? "로그 수정" : "로그 남기기")}
-      </Button>
-
-      {open ? (
-        <>
+  const modal =
+    open && mounted ? (
+      <>
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
           onClick={closeModal}
         >
           <Card
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto shadow-xl"
+            className="max-h-[90vh] w-full max-w-xl overflow-y-auto shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <ModalCardHeader
@@ -364,7 +364,7 @@ export function MatchLogForm({
             />
             <CardContent className="pt-0">
               {!activeMatch ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <form
                     className="grid gap-3 sm:grid-cols-[1fr_auto]"
                     onSubmit={searchMatches}
@@ -403,7 +403,7 @@ export function MatchLogForm({
               ) : null}
 
               {activeMatch ? (
-                <form className="grid gap-4 md:grid-cols-2" onSubmit={submit}>
+                <form className="grid gap-3 md:grid-cols-2" onSubmit={submit}>
                   {!match ? (
                     <div className="md:col-span-2">
                       <Button
@@ -416,7 +416,7 @@ export function MatchLogForm({
                       </Button>
                     </div>
                   ) : null}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="watchedDate">관람일</Label>
                     <Button
                       className="w-full justify-start"
@@ -428,93 +428,63 @@ export function MatchLogForm({
                       {form.watchedDate}
                     </Button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <RatingPicker
                       value={form.rating}
                       onChange={(rating) => setForm({ ...form, rating })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>공개 범위</Label>
-                    <PillRadioGroup
-                      columnsClassName="grid-cols-2 sm:grid-cols-4"
-                      name="visibility"
-                      options={[
-                        { value: "public", label: "공개" },
-                        { value: "local", label: "앱 공개" },
-                        { value: "followers", label: "팔로워" },
-                        { value: "private", label: "비공개" },
-                      ]}
-                      value={form.visibility}
-                      onChange={(value) =>
-                        setForm({ ...form, visibility: value as ReviewVisibility })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fediverse 공개</Label>
-                    <PillRadioGroup
-                      columnsClassName="grid-cols-2"
-                      name="federated"
-                      options={[
-                        { value: "false", label: "아니오" },
-                        { value: "true", label: "예" },
-                      ]}
-                      value={String(form.federated)}
-                      onChange={(value) =>
-                        setForm({ ...form, federated: value === "true" })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label>관람 방식</Label>
                     <PillRadioGroup
-                      columnsClassName="grid-cols-2 sm:grid-cols-4"
+                      columnsClassName="grid-cols-3"
                       name="watchedType"
                       options={reviewWatchOptions}
                       value={form.watchedType}
                       onChange={(value) =>
-                        setForm({ ...form, watchedType: value as ReviewWatchedType })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>응원팀</Label>
-                    <PillRadioGroup
-                      columnsClassName="grid-cols-3"
-                      name="supportingTeamId"
-                      options={[
-                        { value: "", label: "없음/다른 팀" },
-                        {
-                          value: activeMatch.homeTeam.id,
-                          label: activeMatch.homeTeam.name,
-                        },
-                        {
-                          value: activeMatch.awayTeam.id,
-                          label: activeMatch.awayTeam.name,
-                        },
-                      ]}
-                      value={form.supportingTeamId}
-                      onChange={(value) =>
                         setForm({
                           ...form,
-                          supportingTeamId: value,
-                          fanPerspective: perspectiveFor(activeMatch, value),
+                          watchedType: value as ReviewWatchedType,
                         })
                       }
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="supportingTeamId">응원팀</Label>
+                    <Select
+                      id="supportingTeamId"
+                      className="truncate"
+                      value={form.supportingTeamId}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setForm({
+                          ...form,
+                          supportingTeamId: value,
+                          fanPerspective: perspectiveFor(activeMatch, value),
+                        });
+                      }}
+                    >
+                      <option value="">없음/다른 팀</option>
+                      <option value={activeMatch.homeTeam.id}>
+                        {activeMatch.homeTeam.name}
+                      </option>
+                      <option value={activeMatch.awayTeam.id}>
+                        {activeMatch.awayTeam.name}
+                      </option>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
                     <Label htmlFor="quickReview">리뷰</Label>
                     <Textarea
                       id="quickReview"
+                      rows={4}
                       value={form.reviewText}
                       onChange={(event) =>
                         setForm({ ...form, reviewText: event.target.value })
                       }
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-1.5 md:col-span-2">
                     <Label>대표 감정</Label>
                     <PillRadioGroup
                       columnsClassName="grid-cols-3 sm:grid-cols-6"
@@ -526,7 +496,7 @@ export function MatchLogForm({
                       }
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-1.5 md:col-span-2">
                     <Label htmlFor="quickTags">태그</Label>
                     <Input
                       id="quickTags"
@@ -536,10 +506,43 @@ export function MatchLogForm({
                       }
                     />
                   </div>
-                  <Button className="md:col-span-2" disabled={saving} type="submit">
-                    <Save className="h-4 w-4" />
-                    {resolvedLog ? "저장" : "로그 저장"}
-                  </Button>
+                  <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <Label htmlFor="visibility">공개 범위</Label>
+                      <Select
+                        id="visibility"
+                        value={form.visibility}
+                        onChange={(event) =>
+                          setForm({
+                            ...form,
+                            visibility: event.target.value as ReviewVisibility,
+                          })
+                        }
+                      >
+                        <option value="public">공개</option>
+                        <option value="local">앱 공개</option>
+                        <option value="followers">팔로워</option>
+                        <option value="private">비공개</option>
+                      </Select>
+                    </div>
+                    <label
+                      htmlFor="federated-footer"
+                      className="flex h-10 shrink-0 items-center gap-2 rounded-md border border-input bg-card px-3 text-sm"
+                    >
+                      <Checkbox
+                        id="federated-footer"
+                        checked={form.federated}
+                        onChange={(event) =>
+                          setForm({ ...form, federated: event.target.checked })
+                        }
+                      />
+                      <span>Fediverse 공개</span>
+                    </label>
+                    <Button className="md:min-w-28" disabled={saving} type="submit">
+                      <Save className="h-4 w-4" />
+                      {resolvedLog ? "저장" : "로그 저장"}
+                    </Button>
+                  </div>
                 </form>
               ) : null}
             </CardContent>
@@ -551,8 +554,28 @@ export function MatchLogForm({
           onChange={(watchedDate) => setForm({ ...form, watchedDate })}
           onClose={() => setDatePickerOpen(false)}
         />
-        </>
-      ) : null}
+      </>
+    ) : null;
+
+  if (!canWrite) return null;
+
+  return (
+    <>
+      <Button
+        className={cn(
+          fixed && "fixed bottom-5 right-5 z-40 shadow-lg sm:bottom-8 sm:right-8",
+          triggerClassName,
+        )}
+        size={triggerSize}
+        type="button"
+        variant={triggerVariant}
+        onClick={openModal}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        <CalendarPlus className="h-4 w-4" />
+        {buttonLabel ?? (resolvedLog ? "로그 수정" : "로그 남기기")}
+      </Button>
+      {modal ? createPortal(modal, document.body) : null}
     </>
   );
 }

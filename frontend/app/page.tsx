@@ -1,4 +1,4 @@
-import { ProfileScreen } from "@/features/profile/profile-screen";
+import { HomeScreen } from "@/features/home/home-screen";
 
 type HomePageProps = {
   searchParams?: Promise<{ userId?: string }>;
@@ -6,5 +6,5 @@ type HomePageProps = {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = searchParams ? await searchParams : undefined;
-  return <ProfileScreen userId={params?.userId ?? "user-me"} />;
+  return <HomeScreen userId={params?.userId} />;
 }

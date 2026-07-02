@@ -33,7 +33,7 @@ type StatScope = {
 type ProfileTabProps = {
   followerCount: number;
   friendPosts: PostFeedItem[];
-  meId: string;
+  meId?: string;
   myPosts: PostFeedItem[];
   postQuery: string;
   popularPosts: PostFeedItem[];
@@ -51,6 +51,7 @@ type ProfileTabProps = {
     receivedLikes: number;
   };
   user: UserDetail;
+  viewer: UserDetail | null;
   headerAction?: {
     label: string;
     onClick: () => void;
@@ -77,6 +78,7 @@ export function ProfileTab({
   stats,
   scopedStats,
   user,
+  viewer,
   headerAction,
   onPostQueryChange,
   onScopeChange,
@@ -123,7 +125,9 @@ export function ProfileTab({
               <h3 className="text-2xl font-semibold tracking-tight">
                 {user.displayName}
               </h3>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              {viewer && isOwnProfile ? (
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              ) : null}
               {user.handle ? (
                 <p className="text-sm text-muted-foreground">{user.handle}</p>
               ) : null}
@@ -137,14 +141,6 @@ export function ProfileTab({
             <p className="text-sm leading-6 text-muted-foreground">
               {user.bio ?? "소개가 없습니다."}
             </p>
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">ActivityPub</p>
-              <div className="flex flex-col gap-1 text-sm">
-                <span>Actor: {user.actorUrl ?? "준비 중"}</span>
-                <span>Handle: {user.handle ?? "준비 중"}</span>
-                <span>연동 상태: {user.actorUrl ? "연결 가능" : "미연동"}</span>
-              </div>
-            </div>
             <div className="space-y-2">
               <div>
                 <p className="flex items-center gap-2 text-xs text-muted-foreground">

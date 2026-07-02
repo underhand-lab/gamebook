@@ -110,17 +110,6 @@ export function ReviewCard({
               {review.rating == null ? "N/R" : review.rating.toFixed(1)}
             </Badge>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>공개 범위: {review.visibility}</span>
-            <span>관람 방식: {review.watchedType ?? "unknown"}</span>
-            <span>Fediverse: {review.federated ? "공개" : "미공개"}</span>
-          </div>
-          {review.canonicalUrl ? (
-            <p className="text-xs text-muted-foreground">Canonical: {review.canonicalUrl}</p>
-          ) : null}
-          <p className="text-xs text-muted-foreground">
-            Federation: {review.federationStatus ?? "none"}
-          </p>
           <div>
             <p className="mt-2 text-sm leading-6 text-foreground/85">
               <MessageSquareQuote className="mr-1 inline h-4 w-4 translate-y-[-1px] text-muted-foreground" />

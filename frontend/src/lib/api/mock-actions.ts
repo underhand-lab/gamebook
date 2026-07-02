@@ -15,6 +15,7 @@ import {
   average,
   clone,
   countByEmotion,
+  favoriteTeamsForUser,
   logMatchesScope,
   playersFor,
   ratingDistribution,
@@ -22,6 +23,7 @@ import {
   rankStadiums,
   rankTeams,
   requireMatch,
+  requireSessionUser,
   reviewMatchesScope,
   state,
   syncMySummary,
@@ -45,24 +47,27 @@ function reviewDefaults(matchId: string) {
 }
 
 export function updateProfile(payload: UpdateProfileRequest) {
-  state.me = {
-    ...state.me,
-    displayName: payload.displayName ?? state.me.displayName,
-    bio: payload.bio === undefined ? state.me.bio : payload.bio,
+  const me = requireSessionUser();
+  const updated = {
+    ...me,
+    displayName: payload.displayName ?? me.displayName,
+    bio: payload.bio === undefined ? me.bio : payload.bio,
     primaryTeam:
       payload.primaryTeamId === undefined
-        ? state.me.primaryTeam
+        ? me.primaryTeam
         : teamById(payload.primaryTeamId),
   };
+  state.users = state.users.map((user) => (user.id === me.id ? updated : user));
   syncMySummary();
-  return clone(state.me);
+  return clone(updated);
 }
 
 export function updateFavoriteTeams(payload: UpdateFavoriteTeamsRequest) {
+  const me = requireSessionUser();
   const uniqueTeamIds = [...new Set(payload.teamIds)];
   const now = new Date().toISOString();
 
-  state.favoriteTeams = uniqueTeamIds.flatMap((teamId): FavoriteTeam[] => {
+  const nextFavorites = uniqueTeamIds.flatMap((teamId): FavoriteTeam[] => {
     const team = teamById(teamId);
     if (!team) return [];
     const sport = sports.find((item) => item.id === team.sportId);
@@ -71,50 +76,59 @@ export function updateFavoriteTeams(payload: UpdateFavoriteTeamsRequest) {
 
     return [
       {
-        id: `favorite-${state.me.id}-${team.id}`,
-        userId: state.me.id,
+        id: `favorite-${me.id}-${team.id}`,
+        userId: me.id,
         sport,
         league,
         team,
         createdAt:
-          state.favoriteTeams.find((item) => item.team.id === team.id)?.createdAt ??
+          favoriteTeamsForUser(me.id).find((item) => item.team.id === team.id)?.createdAt ??
           now,
       },
     ];
   });
 
-  state.me = {
-    ...state.me,
-    primaryTeam: state.favoriteTeams[0]?.team ?? state.me.primaryTeam ?? null,
-  };
+  state.favoriteTeamsByUserId[me.id] = nextFavorites;
+  state.users = state.users.map((user) =>
+    user.id === me.id
+      ? {
+          ...user,
+          favoriteTeams: nextFavorites,
+          primaryTeam: nextFavorites[0]?.team ?? user.primaryTeam ?? null,
+        }
+      : user,
+  );
   syncMySummary();
-  return clone(state.favoriteTeams);
+  return clone(nextFavorites);
 }
 
 export function followUser(userId: string) {
-  if (userId === state.me.id) return;
-  const current = state.followingByUserId[state.me.id] ?? [];
+  const me = requireSessionUser();
+  if (userId === me.id) return;
+  const current = state.followingByUserId[me.id] ?? [];
   if (!current.includes(userId)) {
-    state.followingByUserId[state.me.id] = [...current, userId];
+    state.followingByUserId[me.id] = [...current, userId];
   }
 }
 
 export function unfollowUser(userId: string) {
-  const current = state.followingByUserId[state.me.id] ?? [];
-  state.followingByUserId[state.me.id] = current.filter((id) => id !== userId);
+  const me = requireSessionUser();
+  const current = state.followingByUserId[me.id] ?? [];
+  state.followingByUserId[me.id] = current.filter((id) => id !== userId);
 }
 
 export function createOrUpdateLog(
   matchId: string,
   payload: CreateMatchLogRequest,
 ) {
+  const me = requireSessionUser();
   const existing = state.logs.find(
-    (log) => log.userId === state.me.id && log.match.id === matchId,
+    (log) => log.userId === me.id && log.match.id === matchId,
   );
   const next = {
     ...(existing ?? {
       id: `log-${matchId}-${Date.now()}`,
-      userId: state.me.id,
+      userId: me.id,
       attendanceVerified: false,
     }),
     match: toSummary(requireMatch(matchId)),
@@ -145,22 +159,23 @@ export function updateLog(logId: string, payload: CreateMatchLogRequest) {
 }
 
 export function createReview(matchId: string, payload: CreateReviewRequest) {
+  const me = requireSessionUser();
   const now = new Date().toISOString();
   const review: Review = {
     id: `review-${matchId}-${Date.now()}`,
     matchId,
     ...reviewDefaults(matchId),
     user: {
-      id: state.me.id,
-      displayName: state.me.displayName,
-      avatarUrl: state.me.avatarUrl,
-      handle: state.me.handle,
-      actorUrl: state.me.actorUrl,
-      inboxUrl: state.me.inboxUrl,
-      outboxUrl: state.me.outboxUrl,
-      followersUrl: state.me.followersUrl,
-      followingUrl: state.me.followingUrl,
-      isLocalUser: state.me.isLocalUser,
+      id: me.id,
+      displayName: me.displayName,
+      avatarUrl: me.avatarUrl,
+      handle: me.handle,
+      actorUrl: me.actorUrl,
+      inboxUrl: me.inboxUrl,
+      outboxUrl: me.outboxUrl,
+      followersUrl: me.followersUrl,
+      followingUrl: me.followingUrl,
+      isLocalUser: me.isLocalUser,
     },
     rating: payload.rating,
     title: payload.title ?? null,
@@ -233,16 +248,17 @@ export function setReviewLike(reviewId: string, liked: boolean) {
 }
 
 export function upsertVote(matchId: string, playerId: string) {
+  const me = requireSessionUser();
   const player = playersFor(matchId).find((item) => item.id === playerId);
   if (!player) throw new Error(`Player not found: ${playerId}`);
   const existing = state.votes.find(
-    (vote) => vote.matchId === matchId && vote.userId === state.me.id,
+    (vote) => vote.matchId === matchId && vote.userId === me.id,
   );
   const next = {
     ...(existing ?? {
       id: `vote-${matchId}-${Date.now()}`,
       matchId,
-      userId: state.me.id,
+      userId: me.id,
       createdAt: new Date().toISOString(),
     }),
     player,

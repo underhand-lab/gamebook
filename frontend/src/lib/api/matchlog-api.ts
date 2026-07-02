@@ -66,6 +66,11 @@ export type AuthResponse = {
   user: UserDetail;
 };
 
+export type AuthSession = {
+  accessToken?: string;
+  user: UserDetail | null;
+};
+
 export type Sport = {
   id: string;
   name: string;
@@ -469,6 +474,10 @@ export type PostFeedParams = PageParams & {
 };
 
 export type MatchlogApi = {
+  signup(payload: SignupRequest): Promise<AuthResponse>;
+  login(payload: LoginRequest): Promise<AuthResponse>;
+  logout(): Promise<void>;
+  getSession(): Promise<AuthSession>;
   getMe(): Promise<UserDetail>;
   updateMyProfile(payload: UpdateProfileRequest): Promise<UserDetail>;
   followUser(userId: string): Promise<void>;

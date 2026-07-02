@@ -44,7 +44,7 @@ export function MatchCard({ match, compact = false }: MatchCardProps) {
               </Badge>
               <Link
                 className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                href={`/matches?leagueId=${encodeURIComponent(match.league.id)}&q=${encodeURIComponent(match.league.name)}`}
+                href={`/calendar?mode=all&leagueId=${encodeURIComponent(match.league.id)}`}
                 onClick={(event) => event.stopPropagation()}
               >
                 {match.league.name}

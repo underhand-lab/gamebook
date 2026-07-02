@@ -16,7 +16,9 @@ type StatScope = {
 };
 
 type ProfileHubState = {
-  me: UserDetail;
+  viewer: UserDetail | null;
+  profileUser: UserDetail;
+  isOwnProfile: boolean;
   stats: UserStats;
   profilePosts: PostFeedItem[];
   myPosts: PostFeedItem[];
@@ -41,11 +43,14 @@ export function useProfileHubData(
   const [statScope, setStatScope] = useState<StatScope>({ leagueId: "", teamId: "" });
 
   const load = useCallback(async () => {
-    const isMe = userId === "user-me";
-    const profileUserId = isMe ? "user-me" : userId;
+    const session = await matchlogApi.getSession();
+    const viewer = session.user;
+    const requestedOwnProfile = userId === "user-me";
+    const profileUserId = requestedOwnProfile ? (viewer?.id ?? "user-me") : userId;
+    const isOwnProfile = Boolean(viewer && viewer.id === profileUserId);
     const postParams = { q: postQuery, size: 100 };
     const [
-      me,
+      profileUser,
       stats,
       statOptions,
       profilePostsPage,
@@ -55,32 +60,34 @@ export function useProfileHubData(
       profileFollowingUsers,
       profileFollowerUsers,
     ] = await Promise.all([
-      isMe ? matchlogApi.getMe() : matchlogApi.getUser(userId),
+      matchlogApi.getUser(profileUserId),
       matchlogApi.getUserStats(profileUserId, statScope),
       matchlogApi.getUserStatOptions(profileUserId, {
         leagueId: statScope.leagueId,
       }),
       matchlogApi.listUserPosts(profileUserId, postParams),
-      isMe
+      isOwnProfile
         ? matchlogApi.listFollowingPosts({ q: postQuery, size: 50 })
         : Promise.resolve(emptyPostPage()),
-      isMe
+      isOwnProfile
         ? matchlogApi.listPopularPosts({
             q: postQuery,
             size: 50,
             sort: "MOST_LIKED",
           })
         : Promise.resolve(emptyPostPage()),
-      matchlogApi.listFollowingUsers(),
+      viewer ? matchlogApi.listFollowingUsers() : Promise.resolve([]),
       matchlogApi.listFollowingUsers(profileUserId),
       matchlogApi.listFollowerUsers(profileUserId),
     ]);
 
     setState({
-      me,
+      viewer,
+      profileUser,
+      isOwnProfile,
       stats,
       profilePosts: profilePostsPage.items,
-      myPosts: isMe ? profilePostsPage.items : [],
+      myPosts: isOwnProfile ? profilePostsPage.items : [],
       friendPosts: friendPostsPage.items,
       popularPosts: popularPostsPage.items,
       statLeagueOptions: statOptions.leagues,
@@ -95,7 +102,10 @@ export function useProfileHubData(
     load();
   }, [load]);
 
-  const selectedTeams = useMemo(() => state?.me.favoriteTeams ?? [], [state?.me.favoriteTeams]);
+  const selectedTeams = useMemo(
+    () => state?.profileUser.favoriteTeams ?? [],
+    [state?.profileUser.favoriteTeams],
+  );
   const profilePosts = useMemo(() => state?.profilePosts ?? [], [state?.profilePosts]);
   const myPosts = useMemo(() => state?.myPosts ?? [], [state?.myPosts]);
   const friendPosts = useMemo(() => state?.friendPosts ?? [], [state?.friendPosts]);

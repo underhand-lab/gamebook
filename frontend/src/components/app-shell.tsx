@@ -4,11 +4,11 @@ import Link from "next/link";
 import { CalendarDays, Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
+import { MockAuthControls } from "@/components/auth/mock-auth-controls";
 import { GlobalLogButton } from "@/features/matches/global-log-button";
 
 const navItems = [
   { href: "/", label: "홈", icon: Home },
-  { href: "/today", label: "경기", icon: CalendarDays },
   { href: "/calendar", label: "달력", icon: CalendarDays },
 ];
 
@@ -30,9 +30,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </span>
             </span>
           </Link>
-          <Suspense fallback={<NavFallback />}>
-            <NavLinks />
-          </Suspense>
+          <div className="flex items-center gap-3">
+            <Suspense fallback={<NavFallback />}>
+              <NavLinks />
+            </Suspense>
+            <MockAuthControls />
+          </div>
         </div>
       </header>
       <main>{children}</main>

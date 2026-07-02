@@ -13,11 +13,10 @@ import {
   type MatchAggregate,
   type MatchDetail,
   type MatchLogAggregate,
-  type UserDetail,
 } from "@/lib/api";
 
 type DetailState = {
-  me: UserDetail;
+  meId?: string;
   match: MatchDetail;
   myItem?: MatchLogAggregate | null;
 };
@@ -29,14 +28,16 @@ export function MatchDetailScreen({ matchId }: { matchId: string }) {
   const [statTab, setStatTab] = useState<StatFanScope>("HOME_FAN");
 
   const load = useCallback(async () => {
-    const [me, match, timeline] = await Promise.all([
-      matchlogApi.getMe(),
+    const [session, match] = await Promise.all([
+      matchlogApi.getSession(),
       matchlogApi.getMatchDetail(matchId),
-      matchlogApi.listMyTimeline({ matchId, size: 1 }),
     ]);
+    const timeline = session.user
+      ? await matchlogApi.listMyTimeline({ matchId, size: 1 })
+      : { items: [] };
 
     setState({
-      me,
+      meId: session.user?.id,
       match,
       myItem: timeline.items[0] ?? null,
     });
@@ -81,7 +82,7 @@ export function MatchDetailScreen({ matchId }: { matchId: string }) {
           <MatchDetailPostsCard
             initialReviews={[]}
             match={match}
-            meId={state.me.id}
+            meId={state.meId}
             myItem={state.myItem ?? null}
             fanTab={postTab}
             onFanTabChange={setPostTab}

@@ -9,8 +9,10 @@ import type {
 import {
   average,
   clone,
+  favoriteTeamsForUser,
   page,
   requireMatch,
+  sessionUser,
   state,
   timelineItem,
   toSummary,
@@ -102,7 +104,10 @@ export function listMatchesByDate(
   date: string,
   params: DateMatchSearchParams = {},
 ) {
-  const favoriteIds = state.favoriteTeams.map((item) => item.team.id);
+  const viewer = sessionUser();
+  const favoriteIds = viewer
+    ? favoriteTeamsForUser(viewer.id).map((item) => item.team.id)
+    : [];
   const requestedFavoriteIds = params.favoriteTeamId
     ? [params.favoriteTeamId]
     : favoriteIds;
@@ -125,6 +130,11 @@ export function listMatchesByDate(
     })
     .filter((match) => !params.sportId || match.sport.id === params.sportId)
     .filter((match) => !params.leagueId || match.league.id === params.leagueId)
+    .filter(
+      (match) =>
+        !params.teamId ||
+        [match.homeTeam.id, match.awayTeam.id].includes(params.teamId),
+    )
     .filter((match) => {
       if (!shouldFilterFavorite) return true;
       const teamIds = [match.homeTeam.id, match.awayTeam.id];
@@ -138,8 +148,12 @@ export function listMatchesByDate(
 }
 
 export function getCalendarMonth(month: string) {
+  const viewer = sessionUser();
+  if (!viewer) {
+    return clone({ month, days: [] });
+  }
   const logs = state.logs.filter(
-    (log) => log.userId === state.me.id && dateKey(log.watchedAt).startsWith(month),
+    (log) => log.userId === viewer.id && dateKey(log.watchedAt).startsWith(month),
   );
   const dates = [...new Set(logs.map((log) => dateKey(log.watchedAt)))];
   const days = dates.sort().map((date) => {
@@ -159,8 +173,18 @@ export function getCalendarMonth(month: string) {
 }
 
 export function getCalendarDay(date: string) {
+  const viewer = sessionUser();
+  if (!viewer) {
+    return clone({
+      date,
+      entries: [],
+      logCount: 0,
+      reviewCount: 0,
+      averageRating: null,
+    });
+  }
   const entries = state.logs
-    .filter((log) => log.userId === state.me.id && dateKey(log.watchedAt) === date)
+    .filter((log) => log.userId === viewer.id && dateKey(log.watchedAt) === date)
     .map(timelineItem)
     .sort((a, b) => Date.parse(b.timelineDate) - Date.parse(a.timelineDate));
   const reviews = entries.flatMap((entry) => (entry.review ? [entry.review] : []));
@@ -175,8 +199,10 @@ export function getCalendarDay(date: string) {
 }
 
 function reviewsForLogs(logs: typeof state.logs) {
+  const viewer = sessionUser();
+  if (!viewer) return [];
   const logMatchIds = new Set(logs.map((log) => log.match.id));
   return state.reviews.filter(
-    (review) => review.user.id === state.me.id && logMatchIds.has(review.matchId),
+    (review) => review.user.id === viewer.id && logMatchIds.has(review.matchId),
   );
 }

@@ -12,7 +12,7 @@ type Option = {
 };
 
 type StackedSearchSelectProps = {
-  label: string;
+  label?: string;
   placeholder: string;
   query: string;
   options: Option[];
@@ -41,7 +41,7 @@ export function StackedSearchSelect({
 
   return (
     <div className="space-y-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
+      {label ? <div className="text-xs text-muted-foreground">{label}</div> : null}
       <div className="relative">
         <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1">

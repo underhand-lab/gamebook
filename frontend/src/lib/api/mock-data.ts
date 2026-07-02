@@ -13,6 +13,15 @@ import type {
   UserDetail,
 } from "./matchlog-api";
 
+export const mockPasswordByEmail: Record<string, string> = {
+  "easyh@gamelog.local": "mock1234",
+  "ana@gamelog.local": "mock1234",
+  "min@gamelog.local": "mock1234",
+  "jun@gamelog.local": "mock1234",
+  "soo@gamelog.local": "mock1234",
+  "hae@gamelog.local": "mock1234",
+};
+
 export const currentUser: UserDetail = {
   id: "user-me",
   email: "easyh@gamelog.local",

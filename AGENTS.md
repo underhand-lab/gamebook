@@ -54,6 +54,7 @@
 - After implementation, run the project's standard verification workflow exactly once.
 - Use the verification process already established by the repository.
 - Examples include build, test, lint, type-check, or an equivalent project-standard verification process.
+- If the user explicitly requests a narrower verification scope, follow that request exactly (for example, run lint only and skip build/test).
 - If verification fails, a maximum of one automatic fix attempt is allowed.
 - Repeating the same failed modification strategy is prohibited.
 - If verification fails again after the retry, stop immediately.

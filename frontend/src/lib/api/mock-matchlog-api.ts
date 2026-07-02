@@ -1,5 +1,6 @@
 import {
   leagues as seedLeagues,
+  mockPasswordByEmail,
   sports as seedSports,
   teams as seedTeams,
 } from "./mock-data";
@@ -26,15 +27,21 @@ import {
 } from "./mock-actions";
 import {
   aggregateFor,
+  canViewerSeeReview,
   clone,
+  favoriteTeamsForUser,
   logMatchesScope,
   page,
   playersFor,
+  requireSessionUser,
   requireMatch,
   reviewMatchesScope,
+  sessionUser,
+  setSessionUser,
   state,
   timelineItem,
   toSummary,
+  validateMockPassword,
   wait,
 } from "./mock-runtime";
 import {
@@ -47,9 +54,59 @@ import {
 } from "./mock-queries";
 
 export const mockMatchlogApi: MatchlogApi = {
+  async signup(payload) {
+    await wait();
+    const exists = state.users.some((user) => user.email === payload.email);
+    if (exists) throw new Error("Email already exists");
+    const user = {
+      id: `user-${Date.now()}`,
+      email: payload.email,
+      displayName: payload.displayName,
+      avatarUrl: null,
+      handle: null,
+      actorUrl: null,
+      inboxUrl: null,
+      outboxUrl: null,
+      followersUrl: null,
+      followingUrl: null,
+      isLocalUser: true,
+      bio: "새로 가입한 사용자",
+      primaryTeam: null,
+      favoriteTeams: [],
+    };
+    state.users = [user, ...state.users];
+    mockPasswordByEmail[payload.email] = payload.password;
+    state.favoriteTeamsByUserId[user.id] = [];
+    setSessionUser(user.id);
+    return clone({ accessToken: state.accessToken ?? "", user });
+  },
+  async login(payload) {
+    await wait();
+    const user = state.users.find((item) => item.email === payload.email);
+    if (!user || !validateMockPassword(payload.email, payload.password)) {
+      throw new Error("Invalid credentials");
+    }
+    setSessionUser(user.id);
+    return clone({ accessToken: state.accessToken ?? "", user });
+  },
+  async logout() {
+    await wait();
+    setSessionUser(null);
+  },
+  async getSession() {
+    await wait();
+    const user = sessionUser();
+    return clone({
+      accessToken: state.accessToken ?? undefined,
+      user: user
+        ? { ...user, favoriteTeams: favoriteTeamsForUser(user.id) }
+        : null,
+    });
+  },
   async getMe() {
     await wait();
-    return clone({ ...state.me, favoriteTeams: state.favoriteTeams });
+    const me = requireSessionUser();
+    return clone({ ...me, favoriteTeams: favoriteTeamsForUser(me.id) });
   },
   async updateMyProfile(payload) {
     await wait();
@@ -57,16 +114,20 @@ export const mockMatchlogApi: MatchlogApi = {
   },
   async listFavoriteTeams() {
     await wait();
-    return clone(state.favoriteTeams);
+    const me = requireSessionUser();
+    return clone(favoriteTeamsForUser(me.id));
   },
   async updateFavoriteTeams(payload) {
     await wait();
     return updateFavoriteTeams(payload);
   },
-  async listFollowingUsers(userId = state.me.id) {
+  async listFollowingUsers(userId) {
     await wait();
+    const viewer = sessionUser();
+    const baseUserId = userId ?? viewer?.id;
+    if (!baseUserId) return [];
     return clone(
-      (state.followingByUserId[userId] ?? [])
+      (state.followingByUserId[baseUserId] ?? [])
         .map((userId) => state.users.find((user) => user.id === userId))
         .filter((user): user is NonNullable<typeof user> => Boolean(user))
         .map((user) => ({
@@ -187,15 +248,17 @@ export const mockMatchlogApi: MatchlogApi = {
   },
   async listMyLogs(params) {
     await wait();
+    const me = requireSessionUser();
     return page(
-      state.logs.filter((log) => log.userId === state.me.id && logMatchesScope(log, params)),
+      state.logs.filter((log) => log.userId === me.id && logMatchesScope(log, params)),
       params,
     );
   },
   async listMyTimeline(params) {
     await wait();
+    const me = requireSessionUser();
     const items = state.logs
-      .filter((log) => log.userId === state.me.id && logMatchesScope(log, params))
+      .filter((log) => log.userId === me.id && logMatchesScope(log, params))
       .map(timelineItem)
       .filter((item) => matchesText(timelineText(item), params?.q))
       .sort((a, b) => Date.parse(b.timelineDate) - Date.parse(a.timelineDate));
@@ -211,7 +274,12 @@ export const mockMatchlogApi: MatchlogApi = {
   },
   async listMatchReviews(matchId, params: ReviewSearchParams = {}) {
     await wait();
-    let items = state.reviews.filter((review) => review.matchId === matchId);
+    const viewer = sessionUser();
+    let items = state.reviews.filter(
+      (review) =>
+        review.matchId === matchId &&
+        canViewerSeeReview(review, viewer?.id),
+    );
     if (params.excludeUserId) {
       items = items.filter((review) => review.user.id !== params.excludeUserId);
     }
@@ -282,8 +350,9 @@ export const mockMatchlogApi: MatchlogApi = {
   },
   async deleteMvpVote(matchId) {
     await wait();
+    const me = requireSessionUser();
     state.votes = state.votes.filter(
-      (vote) => !(vote.matchId === matchId && vote.userId === state.me.id),
+      (vote) => !(vote.matchId === matchId && vote.userId === me.id),
     );
   },
   async getMyCalendarMonth(month) {
@@ -298,11 +367,13 @@ export const mockMatchlogApi: MatchlogApi = {
     await wait();
     const user = state.users.find((item) => item.id === userId);
     if (!user) throw new Error(`User not found: ${userId}`);
-    return clone(user);
+    return clone({ ...user, favoriteTeams: favoriteTeamsForUser(user.id) });
   },
   async listFollowingPosts(params) {
     await wait();
-    const followingIds = state.followingByUserId[state.me.id] ?? [];
+    const viewer = sessionUser();
+    if (!viewer) return page([], params);
+    const followingIds = state.followingByUserId[viewer.id] ?? [];
     return page(listPostsForUsers(followingIds, params), params);
   },
   async listPopularPosts(params) {
@@ -321,9 +392,11 @@ export const mockMatchlogApi: MatchlogApi = {
   },
   async listUserReviews(userId, params) {
     await wait();
+    const viewer = sessionUser();
     return page(
       state.reviews.filter((review) => {
         if (review.user.id !== userId) return false;
+        if (!canViewerSeeReview(review, viewer?.id)) return false;
         if (!matchesText(userReviewText(review), params?.q)) return false;
         return reviewMatchesScope(review, params);
       }),
@@ -350,11 +423,17 @@ export const mockMatchlogApi: MatchlogApi = {
 };
 
 function listPostsForUsers(userIds: string[], params: PostFeedParams = {}) {
+  const viewer = sessionUser();
   const userIdSet = new Set(userIds);
   const timelinePosts: PostFeedItem[] = state.logs
     .filter((log) => userIdSet.has(log.userId) && logMatchesScope(log, params))
     .map(timelineItem)
-    .filter((item) => item.review && matchesText(timelineText(item), params.q))
+    .filter(
+      (item) =>
+        item.review &&
+        canViewerSeeReview(item.review, viewer?.id) &&
+        matchesText(timelineText(item), params.q),
+    )
     .map((item) => ({
       type: "timeline" as const,
       createdAt: item.timelineDate,
@@ -370,6 +449,7 @@ function listPostsForUsers(userIds: string[], params: PostFeedParams = {}) {
     .filter((review) => {
       if (!userIdSet.has(review.user.id)) return false;
       if (timelineReviewIds.has(review.id)) return false;
+      if (!canViewerSeeReview(review, viewer?.id)) return false;
       if (!reviewMatchesScope(review, params)) return false;
       return matchesText(userReviewText(review), params.q);
     })
